@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "movie-database"
+version = "0.1.0"
+description = ""
+authors = ["Mitchell Jensen <mjensen98@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+django = "^5.0.1"
+djangorestframework = "^3.14.0"
+daphne = "^4.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
