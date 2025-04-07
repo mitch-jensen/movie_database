@@ -12,7 +12,7 @@ build-backend = "poetry.core.masonry.api"
 requires      = ["poetry-core"]
 
 [tool.poetry.group.dev.dependencies]
-commitizen    = "^4.4.1"
+commitizen    = "^4.5.0"
 pre-commit    = "^4.2.0"
 pytest        = "^8.3.5"
 pytest-django = "^4.10.0"
