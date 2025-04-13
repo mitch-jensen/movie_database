@@ -24,7 +24,7 @@ class MediaCaseDimensions(models.Model):
         verbose_name_plural = "Media Case Dimensions"
 
     def __str__(self) -> str:  # noqa: D105
-        return f"<MediaCaseDimensions: {self.width} x {self.height} x {self.depth}>"
+        return f"<MediaCaseDimensions ({self.media_format}): {self.width:.2f} x {self.height:.2f} x {self.depth:.2f}>"
 
 
 class Shelf(models.Model):
