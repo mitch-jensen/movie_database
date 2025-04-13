@@ -50,8 +50,8 @@ class Bookcase(models.Model):
     """Represents a physical bookcase/shelf where movies are stored."""
 
     name = models.CharField(max_length=100)
-    description = models.TextField(blank=True)
-    location = models.CharField(max_length=255, blank=True)
+    description = models.CharField(max_length=255)
+    location = models.CharField(max_length=255)
 
     def __str__(self) -> str:  # noqa: D105
         return f"<Bookcase: {self.name}>"
