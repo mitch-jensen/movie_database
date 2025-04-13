@@ -2,7 +2,7 @@ import pytest
 from django.db import IntegrityError
 from model_bakery import baker
 
-from .models import Movie, Shelf
+from .models import MediaCaseDimensions, Movie, Shelf
 
 
 @pytest.fixture
@@ -88,3 +88,40 @@ class TestShelf:
         bookcase = baker.make("Bookcase")
         with pytest.raises(IntegrityError):
             Shelf.objects.create(position_from_top=position_from_top, bookcase=bookcase)
+
+
+class TestMediaCaseDimension:
+    """Test class for the MediaCaseDimensions model."""
+
+    @pytest.mark.django_db
+    def test_bluray_us_standard_exists(self):
+        """Test if the Blu-ray US Standard dimensions exist."""
+        assert MediaCaseDimensions.objects.filter(
+            media_format="Blu-ray",
+            description="Blu-ray (US Standard)",
+            width=128.50,
+            height=148.00,
+            depth=12.00,
+        ).exists()
+
+    @pytest.mark.django_db
+    def test_bluray_uk_standard_exists(self):
+        """Test if the Blu-ray UK Standard dimensions exist."""
+        assert MediaCaseDimensions.objects.filter(
+            media_format="Blu-ray",
+            description="Blu-ray (UK Standard)",
+            width=148.00,
+            height=129.00,
+            depth=14.00,
+        ).exists()
+
+    @pytest.mark.django_db
+    def test_dvd_standard_exists(self):
+        """Test if the DVD Standard dimensions exist."""
+        assert MediaCaseDimensions.objects.filter(
+            media_format="DVD",
+            description="DVD (Standard)",
+            width=130.00,
+            height=184.00,
+            depth=14.00,
+        ).exists()
