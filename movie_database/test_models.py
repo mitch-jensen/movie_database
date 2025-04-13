@@ -2,19 +2,17 @@ import pytest
 from django.db import IntegrityError
 from model_bakery import baker
 
-from .models import Bookcase, MediaCaseDimensions, Movie, Shelf
+from .models import Bookcase, MediaCaseDimensions, Shelf
 
 
-@pytest.fixture
-def movie():
-    """Fixture for baked Movie model."""
-    return baker.make(Movie)
+class TestBookcase:
+    """Test class for the Bookcase model."""
 
-
-@pytest.mark.django_db
-def test_using_movie(movie: Movie):
-    """Test function using fixture of baked model."""
-    assert isinstance(movie, Movie)
+    @pytest.mark.django_db
+    def test_str_method(self):
+        """Test the string representation of the Bookcase model."""
+        bookcase = Bookcase.objects.create(name="Test Bookcase")
+        assert str(bookcase) == "<Bookcase: Test Bookcase>"
 
 
 class TestShelf:
@@ -33,7 +31,7 @@ class TestShelf:
     @pytest.mark.django_db
     def test_shelf_creation(self):
         """Test creating a shelf."""
-        bookcase = baker.make("Bookcase")
+        bookcase: Bookcase = baker.make("Bookcase")
         shelf = Shelf.objects.create(
             position_from_top=1,
             bookcase=bookcase,
@@ -41,12 +39,12 @@ class TestShelf:
 
         assert shelf.position_from_top == 1
         assert shelf.bookcase == bookcase
-        assert str(shelf) == f"<Shelf: {shelf.bookcase.name} - {shelf.position_from_top}>"
+        assert str(shelf) == f"<Shelf: {bookcase.name} - {shelf.position_from_top}>"
 
     @pytest.mark.django_db
     def test_shelf_creation_with_duplicate_position(self):
         """Test creating a shelf with duplicate position."""
-        bookcase = baker.make("Bookcase")
+        bookcase: Bookcase = baker.make("Bookcase")
         Shelf.objects.create(position_from_top=1, bookcase=bookcase)
 
         with pytest.raises(IntegrityError):
@@ -55,8 +53,8 @@ class TestShelf:
     @pytest.mark.django_db
     def test_shelves_with_same_position_in_different_bookcases(self):
         """Shelves with the same position should be allowed in different bookcases."""
-        bookcase1 = baker.make("Bookcase")
-        bookcase2 = baker.make("Bookcase")
+        bookcase1: Bookcase = baker.make("Bookcase")
+        bookcase2: Bookcase = baker.make("Bookcase")
         shelf1 = Shelf.objects.create(position_from_top=1, bookcase=bookcase1)
         shelf2 = Shelf.objects.create(position_from_top=1, bookcase=bookcase2)
 
@@ -69,18 +67,18 @@ class TestShelf:
     @pytest.mark.django_db
     def test_shelf_ordering(self):
         """Shelves should be ordered by position_from_top by default."""
-        bookcase = baker.make("Bookcase")
+        bookcase: Bookcase = baker.make("Bookcase")
         Shelf.objects.create(position_from_top=3, bookcase=bookcase)
         Shelf.objects.create(position_from_top=1, bookcase=bookcase)
         Shelf.objects.create(position_from_top=2, bookcase=bookcase)
 
-        positions = list(bookcase.shelves.values_list("position_from_top", flat=True))
+        positions: list[int] = list(bookcase.shelves.values_list("position_from_top", flat=True))
         assert positions == [1, 2, 3]
 
     @pytest.mark.django_db
     def test_shelf_deletion_on_bookcase_delete(self):
         """Deleting a bookcase should delete its shelves."""
-        bookcase = baker.make("Bookcase")
+        bookcase: Bookcase = baker.make("Bookcase")
         Shelf.objects.create(position_from_top=1, bookcase=bookcase)
         Shelf.objects.create(position_from_top=2, bookcase=bookcase)
 
@@ -95,7 +93,7 @@ class TestShelf:
     )
     def test_shelf_invalid_position(self, position_from_top: int):
         """Shelves should not accept zero or negative positions."""
-        bookcase = baker.make("Bookcase")
+        bookcase: Bookcase = baker.make("Bookcase")
         with pytest.raises(IntegrityError):
             Shelf.objects.create(position_from_top=position_from_top, bookcase=bookcase)
 
