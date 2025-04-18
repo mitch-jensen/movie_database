@@ -83,7 +83,11 @@ class PhysicalMedia(models.Model):
     movies = models.ManyToManyField(Movie, related_name="media_copies", blank=False)
     shelf = models.ForeignKey(Shelf, on_delete=models.SET_NULL, null=True, blank=True)
     position_on_shelf = models.PositiveSmallIntegerField(null=True, blank=True)
-    media_format = models.CharField(max_length=3, choices=MediaFormat.choices)
+    case_dimensions = models.ForeignKey(
+        MediaCaseDimensions,
+        on_delete=models.PROTECT,
+        related_name="media_dimensions",
+    )
     notes = models.TextField(blank=True)
 
     class Meta:  # noqa: D106
@@ -99,4 +103,4 @@ class PhysicalMedia(models.Model):
 
     def __str__(self) -> str:  # noqa: D105
         movie_titles = ", ".join(m.title for m in self.movies.all())
-        return f"<PhysicalMedia ({self.media_format}): {movie_titles}>"
+        return f"<PhysicalMedia: {movie_titles}>"

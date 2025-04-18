@@ -154,16 +154,16 @@ class TestPhysicalMedia:
     def test_str_method_one_movie(self):
         """Test the string representation of the PhysicalMedia model."""
         movie: Movie = baker.make("Movie", title="Test Movie")
-        media: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie], media_format="DVD")
-        assert str(media) == "<PhysicalMedia (DVD): Test Movie>"
+        media: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie])
+        assert str(media) == "<PhysicalMedia: Test Movie>"
 
     @pytest.mark.django_db
     def test_str_method_multiple_movies(self):
         """Test the string representation of the PhysicalMedia model with multiple movies."""
         movie1: Movie = baker.make("Movie", title="Movie 1")
         movie2: Movie = baker.make("Movie", title="Movie 2")
-        media: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie1, movie2], media_format="Blu-ray")
-        assert str(media) == "<PhysicalMedia (Blu-ray): Movie 1, Movie 2>"
+        media: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie1, movie2])
+        assert str(media) == "<PhysicalMedia: Movie 1, Movie 2>"
 
     @pytest.mark.django_db
     def test_physical_media_can_have_multiple_movies(self):
@@ -175,19 +175,6 @@ class TestPhysicalMedia:
         assert media.movies.count() == 2
         assert media.movies.filter(title="Movie 1").exists()
         assert media.movies.filter(title="Movie 2").exists()
-
-    @pytest.mark.django_db
-    @pytest.mark.parametrize(
-        "media_format",
-        ["DVD", "Blu-ray", "4K"],
-        ids=["dvd", "blu_ray", "4k"],
-    )
-    def test_physical_media_can_have_multiple_formats(self, media_format: str):
-        """Test that a PhysicalMedia can have multiple formats."""
-        movie: Movie = baker.make("Movie", title="Test Movie")
-        media: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie], media_format=media_format)
-
-        assert media.media_format == media_format
 
     @pytest.mark.django_db
     def test_physical_media_can_have_shelf(self):
