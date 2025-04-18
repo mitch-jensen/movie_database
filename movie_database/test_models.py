@@ -2,7 +2,7 @@ import pytest
 from django.db import IntegrityError
 from model_bakery import baker
 
-from .models import Bookcase, MediaCaseDimensions, Shelf
+from .models import Bookcase, MediaCaseDimensions, Movie, PhysicalMedia, Shelf
 
 
 class TestBookcase:
@@ -145,3 +145,88 @@ class TestMediaCaseDimension:
             height=184.00,
             depth=14.00,
         ).exists()
+
+
+class TestPhysicalMedia:
+    """Test class for the PhysicalMedia model."""
+
+    @pytest.mark.django_db
+    def test_str_method_one_movie(self):
+        """Test the string representation of the PhysicalMedia model."""
+        movie: Movie = baker.make("Movie", title="Test Movie")
+        media: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie], media_format="DVD")
+        assert str(media) == "<PhysicalMedia (DVD): Test Movie>"
+
+    @pytest.mark.django_db
+    def test_str_method_multiple_movies(self):
+        """Test the string representation of the PhysicalMedia model with multiple movies."""
+        movie1: Movie = baker.make("Movie", title="Movie 1")
+        movie2: Movie = baker.make("Movie", title="Movie 2")
+        media: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie1, movie2], media_format="Blu-ray")
+        assert str(media) == "<PhysicalMedia (Blu-ray): Movie 1, Movie 2>"
+
+    @pytest.mark.django_db
+    def test_physical_media_can_have_multiple_movies(self):
+        """Test that a PhysicalMedia can have multiple movies."""
+        movie1: Movie = baker.make("Movie", title="Movie 1")
+        movie2: Movie = baker.make("Movie", title="Movie 2")
+        media: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie1, movie2])
+
+        assert media.movies.count() == 2
+        assert media.movies.filter(title="Movie 1").exists()
+        assert media.movies.filter(title="Movie 2").exists()
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize(
+        "media_format",
+        ["DVD", "Blu-ray", "4K"],
+        ids=["dvd", "blu_ray", "4k"],
+    )
+    def test_physical_media_can_have_multiple_formats(self, media_format: str):
+        """Test that a PhysicalMedia can have multiple formats."""
+        movie: Movie = baker.make("Movie", title="Test Movie")
+        media: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie], media_format=media_format)
+
+        assert media.media_format == media_format
+
+    @pytest.mark.django_db
+    def test_physical_media_can_have_shelf(self):
+        """Test that a PhysicalMedia can have a shelf."""
+        movie: Movie = baker.make("Movie", title="Test Movie")
+        bookcase: Bookcase = baker.make("Bookcase", name="Test Bookcase")
+        shelf: Shelf = baker.make("Shelf", position_from_top=1, bookcase=bookcase)
+        media: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie], shelf=shelf)
+
+        assert media.shelf == shelf
+        assert media.shelf.bookcase == bookcase
+
+    @pytest.mark.django_db
+    def test_position_on_shelf_is_unique_within_one_shelf(self):
+        """Test that the position on a shelf is unique."""
+        movie1: Movie = baker.make("Movie", title="Movie 1")
+        movie2: Movie = baker.make("Movie", title="Movie 2")
+        bookcase: Bookcase = baker.make("Bookcase", name="Test Bookcase")
+        shelf: Shelf = baker.make("Shelf", position_from_top=1, bookcase=bookcase)
+        _media1: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie1], shelf=shelf, position_on_shelf=1)
+
+        with pytest.raises(IntegrityError):
+            _media2: PhysicalMedia = baker.make(
+                "PhysicalMedia",
+                movies=[movie2],
+                shelf=shelf,
+                position_on_shelf=1,
+            )
+
+    @pytest.mark.django_db
+    def test_position_on_shelf_can_be_same_in_different_shelves(self):
+        """Test that the position on a shelf can be the same in different shelves."""
+        movie1: Movie = baker.make("Movie", title="Movie 1")
+        movie2: Movie = baker.make("Movie", title="Movie 2")
+        bookcase: Bookcase = baker.make("Bookcase", name="Test Bookcase")
+        shelf1: Shelf = baker.make("Shelf", position_from_top=1, bookcase=bookcase)
+        shelf2: Shelf = baker.make("Shelf", position_from_top=2, bookcase=bookcase)
+        media1: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie1], shelf=shelf1, position_on_shelf=1)
+        media2: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie2], shelf=shelf2, position_on_shelf=1)
+
+        assert media1.position_on_shelf == 1
+        assert media2.position_on_shelf == 1
