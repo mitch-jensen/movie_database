@@ -80,7 +80,7 @@ class Collection(models.Model):
 class PhysicalMedia(models.Model):
     """A physical copy of one or more movies (e.g., a DVD, Blu-ray)."""
 
-    movies = models.ManyToManyField(Movie, related_name="media_copies")
+    movies = models.ManyToManyField(Movie, related_name="media_copies", blank=False)
     shelf = models.ForeignKey(Shelf, on_delete=models.SET_NULL, null=True, blank=True)
     position_on_shelf = models.PositiveSmallIntegerField(null=True, blank=True)
     media_format = models.CharField(max_length=3, choices=MediaFormat.choices)
@@ -99,4 +99,4 @@ class PhysicalMedia(models.Model):
 
     def __str__(self) -> str:  # noqa: D105
         movie_titles = ", ".join(m.title for m in self.movies.all())
-        return f"{self.media_format} - {movie_titles}"
+        return f"<PhysicalMedia ({self.media_format}): {movie_titles}>"
