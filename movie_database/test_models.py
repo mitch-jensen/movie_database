@@ -2,7 +2,7 @@ import pytest
 from django.db import IntegrityError
 from model_bakery import baker
 
-from .models import Bookcase, Collection, MediaCaseDimensions, Movie, PhysicalMedia, Shelf
+from .models import Bookcase, Collection, MediaCaseDimensions, Movie, PhysicalMedia, Shelf, TMDbProfile
 
 
 class TestBookcase:
@@ -240,3 +240,58 @@ class TestCollection:
         assert collection.movies.count() == 2
         assert collection.movies.filter(title="Movie 1").exists()
         assert collection.movies.filter(title="Movie 2").exists()
+
+
+class TestTMDbProfile:
+    """Test class for the TMDbProfile model."""
+
+    @pytest.mark.django_db
+    def test_str_method(self):
+        """Test the string representation of the TMDbProfile model."""
+        movie: Movie = baker.make("Movie", title="Test Movie")
+        tmdb_profile = TMDbProfile.objects.create(movie=movie, tmdb_id=12345)
+        assert str(tmdb_profile) == "<TMDbProfile: 12345 - Test Movie>"
+
+    @pytest.mark.django_db
+    def test_cannot_add_duplicate_tmdb_id(self):
+        """Test that a TMDbProfile cannot have duplicate tmdb_id."""
+        movie1: Movie = baker.make("Movie", title="Movie 1")
+        movie2: Movie = baker.make("Movie", title="Movie 2")
+        TMDbProfile.objects.create(movie=movie1, tmdb_id=12345)
+
+        with pytest.raises(IntegrityError):
+            TMDbProfile.objects.create(movie=movie2, tmdb_id=12345)
+
+    @pytest.mark.django_db
+    def test_tmdb_profile_uniqueness_per_movie(self):
+        """Test that a TMDbProfile is unique per movie."""
+        movie: Movie = baker.make("Movie", title="Movie 1")
+        _tmdb_profile1 = TMDbProfile.objects.create(movie=movie, tmdb_id=12345)
+
+        with pytest.raises(IntegrityError):
+            _tmdb_profile2 = TMDbProfile.objects.create(movie=movie, tmdb_id=67890)
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize(
+        "is_adult",
+        [True, False],
+        ids=["adult", "not_adult"],
+    )
+    def test_tmdb_profile_adult_flag(self, is_adult: bool):
+        """Test the adult flag in TMDbProfile."""
+        movie: Movie = baker.make("Movie", title="Test Movie")
+        tmdb_profile = TMDbProfile.objects.create(movie=movie, tmdb_id=12345, adult=is_adult)
+
+        assert tmdb_profile.adult == is_adult
+
+    @pytest.mark.django_db
+    def test_tmdb_profile_delete_on_movie_delete(self):
+        """Test that deleting a movie deletes its TMDbProfile."""
+        movie: Movie = baker.make("Movie", title="Test Movie")
+        _tmdb_profile = TMDbProfile.objects.create(movie=movie, tmdb_id=12345)
+
+        assert TMDbProfile.objects.filter(movie=movie).exists()
+
+        movie.delete()
+
+        assert not TMDbProfile.objects.exists()
