@@ -225,16 +225,17 @@ class TestCollection:
     @pytest.mark.django_db
     def test_str_method(self):
         """Test the string representation of the Collection model."""
-        collection = Collection.objects.create(name="Test Collection")
+        physical_media: PhysicalMedia = baker.make("PhysicalMedia")
+        collection = Collection.objects.create(name="Test Collection", physical_media=physical_media)
         assert str(collection) == "<Collection: Test Collection>"
 
     @pytest.mark.django_db
     def test_collection_can_have_physical_media(self):
         """Test creating a collection."""
-        movie1: Movie = baker.make("Movie", title="Movie 1")
-        movie2: Movie = baker.make("Movie", title="Movie 2")
-        collection = Collection.objects.create(name="Test Collection")
-        collection.movies.add(movie1, movie2)
+        physical_media1: PhysicalMedia = baker.make("PhysicalMedia")
+        physical_media2: PhysicalMedia = baker.make("PhysicalMedia")
+        collection = Collection.objects.create(name="Test Collection", physical_media=physical_media1)
+        collection.movies.add(physical_media2)
 
         assert collection.name == "Test Collection"
         assert collection.movies.count() == 2
@@ -295,3 +296,13 @@ class TestTMDbProfile:
         movie.delete()
 
         assert not TMDbProfile.objects.exists()
+
+
+class TestMovie:
+    """Test class for the Movie model."""
+
+    @pytest.mark.django_db
+    def test_str_method(self):
+        """Test the string representation of the Movie model."""
+        movie = Movie.objects.create(title="Test Movie", release_year=1998)
+        assert str(movie) == "<Movie: Test Movie (1998)>"

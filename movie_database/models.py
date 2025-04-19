@@ -1,3 +1,4 @@
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 
@@ -61,7 +62,7 @@ class Movie(models.Model):
     """Represents a movie linked to a TMDb profile."""
 
     title = models.CharField(max_length=255)
-    release_year = models.DateField()
+    release_year = models.PositiveSmallIntegerField(validators=[MinValueValidator(1888), MaxValueValidator(2100)])
 
     def __str__(self) -> str:  # noqa: D105
         return f"<Movie: {self.title} ({self.release_year})>"
