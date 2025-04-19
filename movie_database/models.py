@@ -71,7 +71,11 @@ class Collection(models.Model):
     """Represents a collection of movies by a distributor."""
 
     name = models.CharField(max_length=255)
-    movies = models.ManyToManyField(Movie)
+    physical_media = models.ForeignKey(
+        "PhysicalMedia",
+        on_delete=models.CASCADE,
+        related_name="collections",
+    )
 
     def __str__(self) -> str:  # noqa: D105
         return f"<Collection: {self.name}>"

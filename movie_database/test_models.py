@@ -2,7 +2,7 @@ import pytest
 from django.db import IntegrityError
 from model_bakery import baker
 
-from .models import Bookcase, MediaCaseDimensions, Movie, PhysicalMedia, Shelf
+from .models import Bookcase, Collection, MediaCaseDimensions, Movie, PhysicalMedia, Shelf
 
 
 class TestBookcase:
@@ -217,3 +217,26 @@ class TestPhysicalMedia:
 
         assert media1.position_on_shelf == 1
         assert media2.position_on_shelf == 1
+
+
+class TestCollection:
+    """Test class for the Collection model."""
+
+    @pytest.mark.django_db
+    def test_str_method(self):
+        """Test the string representation of the Collection model."""
+        collection = Collection.objects.create(name="Test Collection")
+        assert str(collection) == "<Collection: Test Collection>"
+
+    @pytest.mark.django_db
+    def test_collection_can_have_physical_media(self):
+        """Test creating a collection."""
+        movie1: Movie = baker.make("Movie", title="Movie 1")
+        movie2: Movie = baker.make("Movie", title="Movie 2")
+        collection = Collection.objects.create(name="Test Collection")
+        collection.movies.add(movie1, movie2)
+
+        assert collection.name == "Test Collection"
+        assert collection.movies.count() == 2
+        assert collection.movies.filter(title="Movie 1").exists()
+        assert collection.movies.filter(title="Movie 2").exists()
