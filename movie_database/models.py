@@ -67,6 +67,17 @@ class Movie(models.Model):
         return f"<Movie: {self.title} ({self.release_year})>"
 
 
+class TMDbProfile(models.Model):
+    """Metadata from The Movie Database (TMDb)."""
+
+    movie = models.OneToOneField(Movie, on_delete=models.CASCADE, related_name="tmdb")
+    tmdb_id = models.PositiveIntegerField(unique=True)
+    adult = models.BooleanField(default=False)
+
+    def __str__(self) -> str:  # noqa: D105
+        return f"<TMDbProfile: {self.tmdb_id} - {self.movie.title}>"
+
+
 class Collection(models.Model):
     """Represents a collection of movies by a distributor."""
 
