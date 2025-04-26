@@ -241,8 +241,32 @@ class TestCollection:
 
         assert collection.name == "Test Collection"
         assert collection.physical_media.count() == 2
-        assert collection.physical_media.filter(movies__id=movie1.id).exists()
-        assert collection.physical_media.filter(movies__id=movie2.id).exists()
+        assert collection.movies.count() == 2
+        assert list(collection.movies.values_list("title", flat=True)) == ["Movie 1", "Movie 2"]
+
+    @pytest.mark.django_db
+    def test_collection_can_have_physical_media_with_multiple_movies(self):
+        """Test that a collection can have multiple physical media."""
+        movie1: Movie = baker.make("Movie", title="Movie 1")
+        movie2: Movie = baker.make("Movie", title="Movie 2")
+        movie3: Movie = baker.make("Movie", title="Movie 3")
+        movie4: Movie = baker.make("Movie", title="Movie 4")
+        movie5: Movie = baker.make("Movie", title="Movie 5")
+        physical_media1: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie1, movie2, movie3])
+        physical_media2: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie3, movie4, movie5])
+        collection = Collection.objects.create(name="Test Collection")
+        collection.physical_media.add(physical_media1, physical_media2)
+
+        assert collection.physical_media.count() == 2
+        assert collection.movies.count() == 6
+        assert collection.movies.distinct().count() == 5
+        assert list(collection.movies.distinct().values_list("title", flat=True)) == [
+            "Movie 1",
+            "Movie 2",
+            "Movie 3",
+            "Movie 4",
+            "Movie 5",
+        ]
 
 
 class TestTMDbProfile:
