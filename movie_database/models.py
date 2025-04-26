@@ -87,6 +87,11 @@ class Collection(models.Model):
     def __str__(self) -> str:  # noqa: D105
         return f"<Collection: {self.name}>"
 
+    @property
+    def movies(self) -> models.QuerySet[Movie]:
+        """Return a QuerySet of all movies associated with this collection."""
+        return Movie.objects.filter(media_copies__collection=self)
+
 
 class PhysicalMedia(models.Model):
     """A physical copy of one or more movies (e.g., a DVD, Blu-ray)."""
