@@ -232,15 +232,17 @@ class TestCollection:
     @pytest.mark.django_db
     def test_collection_can_have_physical_media(self):
         """Test creating a collection."""
-        physical_media1: PhysicalMedia = baker.make("PhysicalMedia")
-        physical_media2: PhysicalMedia = baker.make("PhysicalMedia")
-        collection = Collection.objects.create(name="Test Collection", physical_media=physical_media1)
-        collection.movies.add(physical_media2)
+        movie1 = baker.make("Movie", title="Movie 1")
+        movie2 = baker.make("Movie", title="Movie 2")
+        physical_media1: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie1])
+        physical_media2: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie2])
+        collection = Collection.objects.create(name="Test Collection")
+        collection.physical_media.add(physical_media1, physical_media2)
 
         assert collection.name == "Test Collection"
-        assert collection.movies.count() == 2
-        assert collection.movies.filter(title="Movie 1").exists()
-        assert collection.movies.filter(title="Movie 2").exists()
+        assert collection.physical_media.count() == 2
+        assert collection.physical_media.filter(movies__id=movie1.id).exists()
+        assert collection.physical_media.filter(movies__id=movie2.id).exists()
 
 
 class TestTMDbProfile:

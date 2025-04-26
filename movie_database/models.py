@@ -83,11 +83,6 @@ class Collection(models.Model):
     """Represents a collection of movies by a distributor."""
 
     name = models.CharField(max_length=255)
-    physical_media = models.ForeignKey(
-        "PhysicalMedia",
-        on_delete=models.CASCADE,
-        related_name="collections",
-    )
 
     def __str__(self) -> str:  # noqa: D105
         return f"<Collection: {self.name}>"
@@ -103,6 +98,13 @@ class PhysicalMedia(models.Model):
         MediaCaseDimensions,
         on_delete=models.PROTECT,
         related_name="media_dimensions",
+    )
+    collection = models.ForeignKey(
+        Collection,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="physical_media",
     )
     notes = models.TextField(blank=True)
 
