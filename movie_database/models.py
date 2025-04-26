@@ -28,11 +28,31 @@ class MediaCaseDimensions(models.Model):
         return f"<MediaCaseDimensions ({self.media_format}): {self.width:.2f} x {self.height:.2f} x {self.depth:.2f}>"
 
 
+class ShelfDimensions(models.Model):
+    """Represents the dimensions of a shelf."""
+
+    width = models.DecimalField(max_digits=5, decimal_places=2)
+    height = models.DecimalField(max_digits=5, decimal_places=2)
+    depth = models.DecimalField(max_digits=5, decimal_places=2)
+
+    class Meta:  # noqa: D106
+        verbose_name = "Shelf Dimensions"
+        verbose_name_plural = "Shelf Dimensions"
+
+    def __str__(self) -> str:  # noqa: D105
+        return f"<ShelfDimensions: {self.width:.2f} x {self.height:.2f} x {self.depth:.2f}>"
+
+
 class Shelf(models.Model):
     """Represents a shelf in a bookcase."""
 
     position_from_top = models.PositiveSmallIntegerField()
     bookcase = models.ForeignKey("Bookcase", on_delete=models.CASCADE, related_name="shelves")
+    dimensions = models.ForeignKey(
+        ShelfDimensions,
+        on_delete=models.PROTECT,
+        related_name="shelf_dimensions",
+    )
 
     class Meta:  # noqa: D106
         ordering = ("position_from_top",)
