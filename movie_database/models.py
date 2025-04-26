@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
@@ -43,6 +45,13 @@ class ShelfDimensions(models.Model):
         return f"<ShelfDimensions: {self.width:.2f} x {self.height:.2f} x {self.depth:.2f}>"
 
 
+class PhysicalMediaOrientation(models.TextChoices):
+    """Choices for Physical Media orientation."""
+
+    VERTICAL = "V", "Vertical"
+    HORIZONTAL = "H", "Horizontal"
+
+
 class Shelf(models.Model):
     """Represents a shelf in a bookcase."""
 
@@ -52,6 +61,11 @@ class Shelf(models.Model):
         ShelfDimensions,
         on_delete=models.PROTECT,
         related_name="shelf_dimensions",
+    )
+    orientation = models.CharField(
+        max_length=1,
+        choices=PhysicalMediaOrientation.choices,
+        default=PhysicalMediaOrientation.VERTICAL,
     )
 
     class Meta:  # noqa: D106
@@ -65,6 +79,44 @@ class Shelf(models.Model):
 
     def __str__(self) -> str:  # noqa: D105
         return f"<Shelf: {self.bookcase.name} - {self.position_from_top}>"
+
+    def can_fit_media(self, media: "PhysicalMedia") -> bool:
+        """Check if a single PhysicalMedia can physically fit on this shelf."""
+        if self.orientation == PhysicalMediaOrientation.VERTICAL:
+            return media.case_dimensions.height <= self.dimensions.height
+
+        if self.orientation == PhysicalMediaOrientation.HORIZONTAL:
+            return media.case_dimensions.width <= self.dimensions.width
+
+        error = f"Invalid orientation: {self.orientation}"
+        raise ValueError(error)
+
+    def remaining_space(self) -> Decimal:
+        """Return remaining usable width (VERTICAL) or height (HORIZONTAL) in mm."""
+        existing_media = PhysicalMedia.objects.filter(shelf=self).select_related("case_dimensions")
+
+        if not existing_media.exists():
+            return self.dimensions.width if self.orientation == PhysicalMediaOrientation.VERTICAL else self.dimensions.height
+
+        if self.orientation == PhysicalMediaOrientation.VERTICAL:
+            used_space = sum((media.case_dimensions.width for media in existing_media), Decimal(0))
+            return self.dimensions.width - used_space
+
+        if self.orientation == PhysicalMediaOrientation.HORIZONTAL:
+            used_space = sum((media.case_dimensions.height for media in existing_media), Decimal(0))
+            return self.dimensions.height - used_space
+
+        error = f"Invalid orientation: {self.orientation}"
+        raise ValueError(error)
+
+    def can_accommodate(self, media: "PhysicalMedia") -> bool:
+        """Check if a PhysicalMedia fits based on both dimensions and available space."""
+        if not self.can_fit_media(media):
+            return False
+
+        if self.orientation == PhysicalMediaOrientation.VERTICAL:
+            return media.case_dimensions.width <= self.remaining_space()
+        return media.case_dimensions.height <= self.remaining_space()
 
 
 class Bookcase(models.Model):

@@ -111,6 +111,10 @@ class TestShelf:
             Shelf.objects.create(position_from_top=position_from_top, bookcase=bookcase, dimensions=dimensions)
 
 
+class TestShelfAccommodation:
+    """Test class for accommodating PhysicalMedia on a shelf."""
+
+
 class TestMediaCaseDimension:
     """Test class for the MediaCaseDimensions model."""
 
