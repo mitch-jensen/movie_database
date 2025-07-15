@@ -1,25 +1,32 @@
 [project]
-authors         = [{ name = "Mitchell Jensen", email = "mjensen98@gmail.com" }]
-dependencies    = ["daphne~=4.0.0", "djangorestframework~=3.14.0", "django~=5.0.1"]
-description     = ""
-name            = "movie-database"
-readme          = "README.md"
+authors = [{ name = "Mitchell Jensen" }]
+dependencies = [
+  "django (>=5.2,<6.0)",
+  "django-ninja>=1.4.3",
+  "pydantic>=2.11.7",
+  "uvicorn (>=0.34.0,<0.35.0)",
+]
+description = ""
+name = "movie-database"
+readme = "README.md"
 requires-python = ">=3.13,<3.14"
-version         = "0.1.0"
+version = "0.1.0"
 
 [build-system]
-build-backend = "poetry.core.masonry.api"
-requires      = ["poetry-core"]
+build-backend = "hatchling.build"
+requires      = ["hatchling"]
 
-[tool.poetry.group.dev.dependencies]
-commitizen    = "^4.8.3"
-pre-commit    = "^4.2.0"
-pytest        = "^8.4.1"
-pytest-django = "^4.11.1"
-ruff          = "^0.12.3"
-
-[tool.poetry]
-package-mode = false
+[dependency-groups]
+dev = [
+  "beartype>=0.20.2,<0.21",
+  "commitizen>=4.8.3,<5",
+  "deptry>=0.23.0",
+  "model-bakery>=1.20.4,<2",
+  "pre-commit>=4.2.0,<5",
+  "pytest-django>=4.11.1,<5",
+  "pytest>=8.4.1,<9",
+  "ruff>=0.12.3,<0.13",
+]
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
@@ -67,7 +74,8 @@ select = ["ALL"]
 fixable = ["ALL"]
 
 [tool.ruff.lint.extend-per-file-ignores]
-"test*.py" = ["ANN201", "ARG", "D103", "FBT", "PLR2004", "S101", "S311"]
+"**/migrations/*.py" = ["D101", "RUF012"]
+"test*.py"           = ["ANN201", "ARG", "D103", "FBT", "PLR2004", "S101", "S311"]
 
 [tool.ruff.format]
 docstring-code-format      = true
@@ -76,3 +84,6 @@ indent-style               = "space"
 line-ending                = "auto"
 quote-style                = "double"
 skip-magic-trailing-comma  = false
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "core.settings"
