@@ -4,7 +4,7 @@ dependencies = [
   "django (>=5.2,<6.0)",
   "django-ninja>=1.4.3",
   "pydantic>=2.11.7",
-  "uvicorn (>=0.34.0,<0.35.0)",
+  "uvicorn (>=0.34.0,<0.36.0)",
 ]
 description = ""
 name = "movie-database"
