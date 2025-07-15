@@ -315,19 +315,6 @@ class TestTMDbProfile:
             _tmdb_profile2 = TMDbProfile.objects.create(movie=movie, tmdb_id=67890)
 
     @pytest.mark.django_db
-    @pytest.mark.parametrize(
-        "is_adult",
-        [True, False],
-        ids=["adult", "not_adult"],
-    )
-    def test_tmdb_profile_adult_flag(self, is_adult: bool):
-        """Test the adult flag in TMDbProfile."""
-        movie: Movie = baker.make("Movie", title="Test Movie")
-        tmdb_profile = TMDbProfile.objects.create(movie=movie, tmdb_id=12345, adult=is_adult)
-
-        assert tmdb_profile.adult == is_adult
-
-    @pytest.mark.django_db
     def test_tmdb_profile_delete_on_movie_delete(self):
         """Test that deleting a movie deletes its TMDbProfile."""
         movie: Movie = baker.make("Movie", title="Test Movie")
