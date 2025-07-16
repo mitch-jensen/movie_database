@@ -135,6 +135,7 @@ class Movie(models.Model):
 
     title = models.CharField(max_length=255)
     release_year = models.PositiveSmallIntegerField(validators=[MinValueValidator(1888), MaxValueValidator(2100)])
+    letterboxd_uri = models.URLField()
 
     def __str__(self) -> str:  # noqa: D105
         return f"<Movie: {self.title} ({self.release_year})>"
