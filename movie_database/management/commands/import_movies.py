@@ -21,9 +21,6 @@ class WatchedEntry(BaseModel):
 
     def normalized_key(self) -> tuple[str, int]:
         """Generate a normalized key for the movie entry."""
-        # Normalize the title by stripping whitespace and converting to lowercase
-        # Note: The year is already an integer, so no need to normalize it
-
         return (self.name.strip().lower(), self.year)
 
 
@@ -34,11 +31,11 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser: ArgumentParser) -> None:
         """Add command line arguments to manage.py command."""
-        parser.add_argument("csv_file", type=Path, help="Path to watched.csv file")
+        parser.add_argument("csv_file", help="Path to watched.csv file")
 
-    def handle(self, *args: Any, **options: dict[str, Path]) -> None:  # noqa: ANN401, ARG002
+    def handle(self, *args: Any, **options: str) -> None:  # noqa: ANN401, ARG002
         """Handle the command to import watched movies."""
-        csv_path: Path = options["csv_file"]
+        csv_path = Path(options["csv_file"])
 
         if not csv_path.exists():
             self.stderr.write(self.style.ERROR(f"File not found: {csv_path}"))
