@@ -35,13 +35,13 @@ class Command(BaseCommand):
 
     def handle(self, *args: Any, **options: str) -> None:  # noqa: ANN401, ARG002
         """Handle the command to import watched movies."""
-        csv_path = Path(options["csv_file"])
+        csv_file: Path = Path(options["csv_file"])
 
-        if not csv_path.exists():
-            self.stderr.write(self.style.ERROR(f"File not found: {csv_path}"))
+        if not csv_file.exists():
+            self.stderr.write(self.style.ERROR(f"File not found: {csv_file}"))
             return
 
-        with csv_path.open(newline="", encoding="utf-8") as csvfile:
+        with csv_file.open(newline="", encoding="utf-8") as csvfile:
             reader = csv.DictReader(csvfile)
             entries = [WatchedEntry.model_validate(row) for row in reader]
 
