@@ -138,6 +138,9 @@ class Movie(models.Model):
     letterboxd_uri = models.URLField()
     watched = models.BooleanField(default=False)
 
+    class Meta:  # noqa: D106
+        constraints = (models.UniqueConstraint(fields=["title", "release_year", "letterboxd_uri"], name="unique_movie"),)
+
     def __str__(self) -> str:  # noqa: D105
         return f"<Movie: {self.title} ({self.release_year})>"
 
