@@ -45,11 +45,11 @@ class TestListMovies:
         data = response.json()
         assert data == {
             "items": [
-                {"id": movie1.id, "title": "Movie 1", "release_year": 2021},
-                {"id": movie2.id, "title": "Movie 2", "release_year": 2022},
-                {"id": movie3.id, "title": "Movie 3", "release_year": 2023},
-                {"id": movie4.id, "title": "Movie 4", "release_year": 2024},
-                {"id": movie5.id, "title": "Movie 5", "release_year": 2025},
+                {"id": movie1.pk, "title": "Movie 1", "release_year": 2021, "watched": movie1.watched, "letterboxd_uri": movie1.letterboxd_uri},
+                {"id": movie2.pk, "title": "Movie 2", "release_year": 2022, "watched": movie2.watched, "letterboxd_uri": movie2.letterboxd_uri},
+                {"id": movie3.pk, "title": "Movie 3", "release_year": 2023, "watched": movie3.watched, "letterboxd_uri": movie3.letterboxd_uri},
+                {"id": movie4.pk, "title": "Movie 4", "release_year": 2024, "watched": movie4.watched, "letterboxd_uri": movie4.letterboxd_uri},
+                {"id": movie5.pk, "title": "Movie 5", "release_year": 2025, "watched": movie5.watched, "letterboxd_uri": movie5.letterboxd_uri},
             ],
             "count": 5,
         }
