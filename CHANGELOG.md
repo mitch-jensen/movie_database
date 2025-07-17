@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/mitch-jensen/movie_database/compare/v0.1.0...v0.2.0) (2025-07-17)
+
+
+### Features
+
+* implement letterboxd import from csv file ([#26](https://github.com/mitch-jensen/movie_database/issues/26)) ([8d77ff5](https://github.com/mitch-jensen/movie_database/commit/8d77ff5c0c0ca50fd9a42a6e5efe5f23daa0bbdc))
+
 ## 0.1.0 (2025-07-15)
 
 
