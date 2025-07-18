@@ -84,39 +84,34 @@ class Shelf(models.Model):
         """Check if a single PhysicalMedia can physically fit on this shelf."""
         if self.orientation == PhysicalMediaOrientation.VERTICAL.value:
             return media.case_dimensions.height <= self.dimensions.height
+        return media.case_dimensions.width <= self.dimensions.width
 
-        if self.orientation == PhysicalMediaOrientation.HORIZONTAL.value:
-            return media.case_dimensions.width <= self.dimensions.width
+    def used_space(self) -> Decimal:
+        """Return the amount of shelf space used up physical media."""
+        # If there are no physical media on the shelf, there's no used space
+        if not self.physicalmedia_set.exists():
+            return Decimal(0)
 
-        error = f"Invalid orientation: {self.orientation}"
-        raise ValueError(error)
+        aggregation_field = f"case_dimensions__{'height' if self.orientation == PhysicalMediaOrientation.VERTICAL.value else 'width'}"
+        used: dict[str, Decimal] = self.physicalmedia_set.select_related("case_dimensions").aggregate(used_space=models.Sum(aggregation_field))
+        return used["used_space"]
 
-    def remaining_space(self) -> Decimal:
+    def available_space(self) -> Decimal:
         """Return remaining usable width (VERTICAL) or height (HORIZONTAL) in mm."""
-        existing_media = PhysicalMedia.objects.filter(shelf=self).select_related("case_dimensions")
-
-        if not existing_media.exists():
-            return self.dimensions.width if self.orientation == PhysicalMediaOrientation.VERTICAL.value else self.dimensions.height
-
-        if self.orientation == PhysicalMediaOrientation.VERTICAL.value:
-            used_space = sum((media.case_dimensions.width for media in existing_media), Decimal(0))
-            return self.dimensions.width - used_space
-
-        if self.orientation == PhysicalMediaOrientation.HORIZONTAL.value:
-            used_space = sum((media.case_dimensions.height for media in existing_media), Decimal(0))
-            return self.dimensions.height - used_space
-
-        error = f"Invalid orientation: {self.orientation}"
-        raise ValueError(error)
+        total_space = self.dimensions.height if self.orientation == PhysicalMediaOrientation.VERTICAL.value else self.dimensions.width
+        return total_space - self.used_space()
 
     def can_accommodate(self, media: "PhysicalMedia") -> bool:
         """Check if a PhysicalMedia fits based on both dimensions and available space."""
+        # If shelf physically cannot fit media, return early
         if not self.can_fit_media(media):
             return False
 
+        available_space = self.available_space()
+
         if self.orientation == PhysicalMediaOrientation.VERTICAL.value:
-            return media.case_dimensions.width <= self.remaining_space()
-        return media.case_dimensions.height <= self.remaining_space()
+            return media.case_dimensions.width <= available_space
+        return media.case_dimensions.height <= available_space
 
 
 class Bookcase(models.Model):
