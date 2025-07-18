@@ -305,8 +305,8 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "django", specifier = ">=5.2,<6.0" },
-    { name = "django-ninja", specifier = ">=1.4.3" },
-    { name = "pydantic", specifier = ">=2.11.7" },
+    { name = "django-ninja", specifier = ">=1.4.3,<2" },
+    { name = "pydantic", specifier = ">=2.11.7,<3" },
     { name = "uvicorn", specifier = ">=0.34.0,<0.36.0" },
 ]
 
