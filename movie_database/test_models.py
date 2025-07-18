@@ -1,8 +1,10 @@
+from decimal import Decimal
+
 import pytest
 from django.db import IntegrityError
 from model_bakery import baker
 
-from .models import Bookcase, Collection, MediaCaseDimensions, Movie, PhysicalMedia, Shelf, ShelfDimensions, TMDbProfile
+from .models import Bookcase, Collection, MediaCaseDimensions, Movie, PhysicalMedia, PhysicalMediaOrientation, Shelf, ShelfDimensions, TMDbProfile
 
 
 class TestBookcase:
@@ -113,6 +115,124 @@ class TestShelf:
 
 class TestShelfAccommodation:
     """Test class for accommodating PhysicalMedia on a shelf."""
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize(
+        ("media_height", "shelf_height", "should_fit"),
+        [
+            (127.0, 127.0, True),
+            (127.0, 128.0, True),
+            (127.0, 127.00001, True),
+            (128.0, 127.0, False),
+            (127.00001, 127.0, False),
+        ],
+        ids=[
+            "shelf and media height equal",
+            "shelf higher than media",
+            "shelf higher than media by fractional margin",
+            "media higher than shelf",
+            "media higher than shelf by fractional margin",
+        ],
+    )
+    def test_can_fit_media_with_vertical_orientation(self, media_height: Decimal, shelf_height: Decimal, should_fit: bool):
+        """Test that Shelf.can_fit_media behaves correctly for vertical orientations."""
+        media = baker.make(PhysicalMedia, case_dimensions__height=media_height)
+        shelf = baker.make(Shelf, dimensions__height=shelf_height, orientation=PhysicalMediaOrientation.VERTICAL)
+
+        assert shelf.can_fit_media(media) == should_fit
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize(
+        ("media_width", "shelf_width", "should_fit"),
+        [
+            (127.0, 127.0, True),
+            (127.0, 128.0, True),
+            (127.0, 127.00001, True),
+            (128.0, 127.0, False),
+            (127.00001, 127.0, False),
+        ],
+        ids=[
+            "shelf and media width equal",
+            "shelf wider than media",
+            "shelf wider than media by fractional margin",
+            "media wider than shelf",
+            "media wider than shelf by fractional margin",
+        ],
+    )
+    def test_can_fit_media_with_horizontal_orientation(self, media_width: Decimal, shelf_width: Decimal, should_fit: bool):
+        """Test that Shelf.can_fit_media behaves correctly for horizontal orientations."""
+        media = baker.make(PhysicalMedia, case_dimensions__width=media_width)
+        shelf = baker.make(Shelf, dimensions__width=shelf_width, orientation=PhysicalMediaOrientation.HORIZONTAL)
+
+        assert shelf.can_fit_media(media) == should_fit
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize(
+        ("shelf_height", "expected_used_space"),
+        [
+            (150, 0),
+            (177, 0),
+            (0, 0),
+            (1000000, 0),
+        ],
+    )
+    def test_used_space_with_vertical_orientation_and_no_media(self, shelf_height: Decimal, expected_used_space: Decimal):
+        """Test that Shelf.used_space behaves correctly with no physical media present."""
+        shelf = baker.make(Shelf, dimensions__height=shelf_height, orientation=PhysicalMediaOrientation.VERTICAL)
+
+        assert shelf.used_space() == expected_used_space
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize(
+        ("shelf_width", "expected_used_space"),
+        [
+            (150, 0),
+            (177, 0),
+            (0, 0),
+            (1000000, 0),
+        ],
+    )
+    def test_used_space_with_horizontal_orientation_and_no_media(self, shelf_width: Decimal, expected_used_space: Decimal):
+        """Test that Shelf.used_space behaves correctly with no physical media present."""
+        shelf = baker.make(Shelf, dimensions__width=shelf_width, orientation=PhysicalMediaOrientation.HORIZONTAL)
+
+        assert shelf.used_space() == expected_used_space
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize(
+        ("shelf_height", "media_heights", "expected_used_space"),
+        [
+            (150, [10], 10),
+            (150, [10, 20, 30], 60),
+            (150, [127.27], Decimal("127.27")),
+            (150, [127.27, 10.78], Decimal("138.05")),
+        ],
+    )
+    def test_used_space_with_vertical_orientation_and_media_present(self, shelf_height: Decimal, media_heights: list[Decimal], expected_used_space: Decimal):
+        """Test that Shelf.used_space is always the sum of physical media widths varying numbers of physical media present."""
+        media = [baker.make(PhysicalMedia, case_dimensions__height=media_width) for media_width in media_heights]
+        shelf = baker.make(Shelf, dimensions__height=shelf_height, orientation=PhysicalMediaOrientation.VERTICAL)
+        shelf.physicalmedia_set.add(*media)
+
+        assert shelf.used_space() == expected_used_space
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize(
+        ("shelf_width", "media_widths", "expected_used_space"),
+        [
+            (150, [10], 10),
+            (150, [10, 20, 30], 60),
+            (150, [127.27], Decimal("127.27")),
+            (150, [127.27, 10.78], Decimal("138.05")),
+        ],
+    )
+    def test_used_space_with_horizontal_orientation_and_media_present(self, shelf_width: Decimal, media_widths: list[Decimal], expected_used_space: Decimal):
+        """Test that Shelf.used_space is always the sum of physical media widths varying numbers of physical media present."""
+        media = [baker.make(PhysicalMedia, case_dimensions__width=media_width) for media_width in media_widths]
+        shelf = baker.make(Shelf, dimensions__width=shelf_width, orientation=PhysicalMediaOrientation.HORIZONTAL)
+        shelf.physicalmedia_set.add(*media)
+
+        assert shelf.used_space() == expected_used_space
 
 
 class TestMediaCaseDimension:
