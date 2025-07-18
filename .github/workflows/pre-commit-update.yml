@@ -1,0 +1,29 @@
+---
+name: CI
+
+"on":
+  schedule:
+    - cron: '0 0 * * 0'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - name: Setup Python and uv
+        uses: astral-sh/setup-uv@v6.3.1
+
+      - name: Run autoupdate
+        run: uv run --frozen pre-commit autoupdate
+
+      - uses: peter-evans/create-pull-request@v7.0.8
+        with:
+          branch: update/pre-commit-hooks
+          title: "chore: update pre-commit hooks"
+          commit-message: "chore: update pre-commit hooks"
+          body: Update versions of pre-commit hooks to latest version.
