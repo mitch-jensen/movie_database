@@ -70,5 +70,6 @@ repos:
         args:
           - --frozen
           - --output-file=requirements.txt
+          - --no-hashes
           - --no-group
           - dev
