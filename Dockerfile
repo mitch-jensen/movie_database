@@ -7,6 +7,7 @@ WORKDIR /app
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements.txt,target=requirements.txt \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     python -m pip install -r requirements.txt
 
 USER python
