@@ -4,6 +4,8 @@ from django.apps.registry import Apps
 from django.db import migrations
 from django.db.backends.base.schema import BaseDatabaseSchemaEditor
 
+from movie_database.models import MediaFormat
+
 
 def add_bluray_dimensions(apps: Apps, schema_editor: BaseDatabaseSchemaEditor) -> None:  # noqa: ARG001
     """Add Blu-ray dimensions to the MediaCaseDimensions model."""
@@ -12,21 +14,21 @@ def add_bluray_dimensions(apps: Apps, schema_editor: BaseDatabaseSchemaEditor) -
     # Define Blu-ray standards in mm (W x H x D)
     dimensions_to_add: list[dict[str, str | float]] = [
         {
-            "media_format": "Blu-ray",
+            "media_format": MediaFormat.BLURAY,
             "description": "Blu-ray (US Standard)",
             "width": 128.50,
             "height": 148.00,
             "depth": 12.00,
         },
         {
-            "media_format": "Blu-ray",
+            "media_format": MediaFormat.BLURAY,
             "description": "Blu-ray (UK Standard)",
             "width": 148.00,
             "height": 129.00,
             "depth": 14.00,
         },
         {
-            "media_format": "DVD",
+            "media_format": MediaFormat.DVD,
             "description": "DVD (Standard)",
             "width": 130.00,
             "height": 184.00,
