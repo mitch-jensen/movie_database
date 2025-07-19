@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('movie_database', '0011_shelf_orientation'),
+        ("movie_database", "0011_shelf_orientation"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='tmdbprofile',
-            name='adult',
+            model_name="tmdbprofile",
+            name="adult",
         ),
     ]
