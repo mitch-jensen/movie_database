@@ -80,4 +80,4 @@ quote-style                = "double"
 skip-magic-trailing-comma  = false
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "core.settings"
+DJANGO_SETTINGS_MODULE = "core.settings_development"
