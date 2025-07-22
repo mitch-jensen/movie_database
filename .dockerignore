@@ -14,10 +14,8 @@ Caddyfile
 CHANGELOG.md
 compose.yml
 Dockerfile
-pyproject.toml
 README.md
 release-please-config.json
-uv.lock
 
 *.log
 *.pot

@@ -3,14 +3,11 @@ services:
     build: .
     volumes:
       - static:/app/static
-    command: >
-      sh -c "python3 manage.py collectstatic --no-input &&
-             python3 manage.py migrate &&
-             python3 -m uvicorn core.asgi:application --host 0.0.0.0 --port 8000"
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-error}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-error}
       POSTGRES_DB: ${POSTGRES_DB:-error}
+      SECRET_KEY: ${SECRET_KEY:-error}
     depends_on:
       - db
 
