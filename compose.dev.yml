@@ -12,3 +12,15 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-error}
       POSTGRES_DB: ${POSTGRES_DB:-error}
       SECRET_KEY: ${SECRET_KEY:-error}
+    develop:
+      watch:
+        - action: sync
+          path: core
+          target: /app/core
+
+        - action: sync
+          path: movie_database
+          target: /app/movie_database
+
+        - action: rebuild
+          path: ./pyproject.toml
