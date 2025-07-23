@@ -1,3 +1,4 @@
+import uuid
 from pathlib import Path
 
 from .settings import *  # noqa: F403
@@ -10,3 +11,5 @@ DATABASES: dict[str, dict[str, str | Path]] = {
         "NAME": BASE_DIR / "db.sqlite3",  # noqa: F405
     },
 }
+
+SECRET_KEY = uuid.uuid4()
