@@ -48,7 +48,9 @@ jobs:
         uses: astral-sh/setup-uv@v6.3.1
 
       - name: Run Docker infra tests
-        run: uv run --frozen pytest docker/tests
+        run: |
+          uv sync --all-groups
+          uv run --frozen pytest docker/tests
 
       - name: Push
         uses: docker/build-push-action@v6.18.0
