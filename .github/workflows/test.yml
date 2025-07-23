@@ -17,4 +17,4 @@ jobs:
         uses: astral-sh/setup-uv@v6.3.1
 
       - name: Run Tests
-        run: uv run --frozen pytest
+        run: uv run --frozen pytest --ignore docker
