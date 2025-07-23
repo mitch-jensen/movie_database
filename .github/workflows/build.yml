@@ -39,6 +39,6 @@ jobs:
           context: .
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          file: Dockerfile
+          file: docker/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: mitch-jensen/movie_database:${{ github.event_name == 'release' && github.event.release.tag_name || 'latest' }}

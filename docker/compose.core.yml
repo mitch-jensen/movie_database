@@ -13,7 +13,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ../Caddyfile:/etc/caddy/Caddyfile
       - static:/app/static:ro
 
 volumes:

@@ -1,3 +1,5 @@
+name: Development
+
 include:
   - compose.core.yml
 
@@ -5,6 +7,8 @@ services:
   django:
     build:
       target: development
+      context: ..
+      dockerfile: docker/Dockerfile  # Dockerfile path is relative to context
     depends_on:
       - db
     environment:
@@ -15,12 +19,12 @@ services:
     develop:
       watch:
         - action: sync
-          path: core
+          path: ../core
           target: /app/core
 
         - action: sync
-          path: movie_database
+          path: ../movie_database
           target: /app/movie_database
 
         - action: rebuild
-          path: ./pyproject.toml
+          path: ../pyproject.toml
