@@ -33,13 +33,30 @@ jobs:
           dockerfile: docker/Dockerfile
           skip-extraction: ${{ steps.cache.outputs.cache-hit }}
 
-      - name: Build and push
+      - name: Build
         uses: docker/build-push-action@v6.18.0
         with:
           context: .
           cache-from: type=gha
           cache-to: type=gha,mode=max
           file: docker/Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
+          load: true
+          target: production
+          tags: mitch-jensen/movie_database:ci
+
+      - name: Setup Python and uv
+        uses: astral-sh/setup-uv@v6.3.1
+
+      - name: Run Docker infra tests
+        run: uv run --frozen pytest docker/tests
+
+      - name: Push
+        uses: docker/build-push-action@v6.18.0
+        if: github.event_name != 'pull_request'
+        with:
+          context: .
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          file: docker/Dockerfile
           target: production
           tags: mitch-jensen/movie_database:${{ github.event_name == 'release' && github.event.release.tag_name || 'latest' }}
