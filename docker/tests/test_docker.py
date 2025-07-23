@@ -13,7 +13,7 @@ from docker.errors import ImageNotFound
 @pytest.fixture(scope="session")
 def host(request: pytest.FixtureRequest) -> Generator[Host]:
     client = docker.from_env()
-    image_tag = "mitch-jensen/movie-database:ci"
+    image_tag = "mitch-jensen/movie_database:ci"
 
     try:
         image = client.images.get(image_tag)
