@@ -6,13 +6,14 @@
 .vscode
 .dockerignore
 .env
+.env.example
 .gitignore
 .pre-commit-config.yaml
 .taplo.toml
 .yamllint.yml
 Caddyfile
 CHANGELOG.md
-compose.yml
+compose*.yml
 Dockerfile
 README.md
 release-please-config.json

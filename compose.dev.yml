@@ -1,0 +1,14 @@
+include:
+  - compose.core.yml
+
+services:
+  django:
+    build:
+      target: development
+    depends_on:
+      - db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-error}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-error}
+      POSTGRES_DB: ${POSTGRES_DB:-error}
+      SECRET_KEY: ${SECRET_KEY:-error}
