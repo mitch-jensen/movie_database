@@ -38,26 +38,19 @@ def host(request: pytest.FixtureRequest) -> Generator[Host]:
         container.remove(force=True)
 
 
-@pytest.fixture
-def versioned_python_dependencies(host: Host) -> list[str]:
-    return host.check_output("python -m pip freeze").split("\n")
-
-
-@pytest.fixture
-def python_dependencies(versioned_python_dependencies: list[str]) -> list[str]:
-    return [d.split("==")[0] for d in versioned_python_dependencies]
-
-
-def test_production_dependencies_are_installed(python_dependencies: list[str]):
+def test_production_dependencies_are_installed(host: Host):
+    dependencies: dict[str, dict[str, str]] = host.pip.get_packages()
     expected_dependencies = ["Django", "uvicorn", "django-ninja", "pydantic", "psycopg"]
-    assert set(expected_dependencies).issubset(python_dependencies)
+    assert set(expected_dependencies).issubset(dependencies)
 
 
-def test_development_dependencies_are_not_installed(python_dependencies: list[str]):
+def test_development_dependencies_are_not_installed(host: Host):
+    dependencies: dict[str, dict[str, str]] = host.pip.get_packages()
     unexpected_dependencies = ["beartype", "commitizen", "deptry", "model-bakery", "pre-commit", "pytest", "pytest-django", "ruff"]
-    assert set(unexpected_dependencies).isdisjoint(python_dependencies)
+    assert set(unexpected_dependencies).isdisjoint(dependencies)
 
 
-def test_test_dependencies_are_not_installed(python_dependencies: list[str]):
+def test_test_dependencies_are_not_installed(host: Host):
+    dependencies: dict[str, dict[str, str]] = host.pip.get_packages()
     unexpected_dependencies = ["docker", "pytest-testinfra"]
-    assert set(unexpected_dependencies).isdisjoint(python_dependencies)
+    assert set(unexpected_dependencies).isdisjoint(dependencies)
