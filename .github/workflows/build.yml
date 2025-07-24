@@ -34,16 +34,17 @@ jobs:
           skip-extraction: ${{ steps.cache.outputs.cache-hit }}
 
       - name: Build
-        uses: docker/bake-action@v6.8.0
+        uses: docker/build-push-action@v6.18.0
         with:
-          source: ./docker
-          files: compose.prod.yml,compose.core.yml
+          context: .
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          file: docker/Dockerfile
           load: true
-          set: |
-            *.cache-from=type=gha
-            *.cache-to=type=gha,mode=max
+          target: production
+          tags: mitch-jensen/movie_database:ci
 
       - name: Run Docker infra tests
         run: |
           curl -fsSL https://goss.rocks/install | sh
-          dgoss run mitch-jensen/movie_database
+          dgoss run mitch-jensen/movie_database:ci
