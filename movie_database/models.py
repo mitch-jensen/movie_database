@@ -1,8 +1,11 @@
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models.manager import RelatedManager
+
+if TYPE_CHECKING:
+    from django.db.models.manager import RelatedManager
 
 
 class MediaFormat(models.TextChoices):
@@ -23,7 +26,7 @@ class MediaCaseDimensions(models.Model):
     width = models.DecimalField(max_digits=5, decimal_places=2)
     height = models.DecimalField(max_digits=5, decimal_places=2)
     depth = models.DecimalField(max_digits=5, decimal_places=2)
-    physical_media_set: RelatedManager["PhysicalMedia"]
+    physical_media_set: "RelatedManager['PhysicalMedia']"
 
     class Meta:  # noqa: D106
         verbose_name = "Media Case Dimensions"
@@ -40,7 +43,7 @@ class ShelfDimensions(models.Model):
     width = models.DecimalField(max_digits=5, decimal_places=2)
     height = models.DecimalField(max_digits=5, decimal_places=2)
     depth = models.DecimalField(max_digits=5, decimal_places=2)
-    shelves: RelatedManager["Shelf"]
+    shelves: "RelatedManager['Shelf']"
 
     class Meta:  # noqa: D106
         verbose_name = "Shelf Dimensions"
@@ -79,7 +82,7 @@ class Shelf(models.Model):
         choices=PhysicalMediaOrientation.choices,
         default=PhysicalMediaOrientation.VERTICAL,
     )
-    physical_media_set: RelatedManager["PhysicalMedia"]
+    physical_media_set: "RelatedManager['PhysicalMedia']"
 
     class Meta:  # noqa: D106
         ordering = ("position_from_top",)
@@ -134,7 +137,7 @@ class Bookcase(models.Model):
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=255)
     location = models.CharField(max_length=255)
-    shelves: RelatedManager["Shelf"]
+    shelves: "RelatedManager['Shelf']"
 
     def __str__(self) -> str:  # noqa: D105
         return f"<Bookcase: {self.name}>"
@@ -153,7 +156,7 @@ class Movie(models.Model):
     )
     letterboxd_uri = models.URLField()
     watched = models.BooleanField(default=False)
-    physical_media_set: RelatedManager["PhysicalMedia"]
+    physical_media_set: "RelatedManager['PhysicalMedia']"
 
     class Meta:  # noqa: D106
         constraints = (
@@ -192,7 +195,7 @@ class Collection(models.Model):
 
     id: int
     name = models.CharField(max_length=255)
-    physical_media_set: RelatedManager["PhysicalMedia"]
+    physical_media_set: "RelatedManager['PhysicalMedia']"
 
     def __str__(self) -> str:  # noqa: D105
         return f"<Collection: {self.name}>"
