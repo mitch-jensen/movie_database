@@ -36,8 +36,8 @@ jobs:
       - name: Build
         uses: docker/bake-action@v6.8.0
         with:
-          source: .
-          files: docker/compose.prod.yml,docker/compose.core.yml
+          source: ./docker
+          files: compose.prod.yml,compose.core.yml
           load: true
           set: |
             *.cache-from=type=gha
