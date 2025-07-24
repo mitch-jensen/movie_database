@@ -88,8 +88,9 @@ DJANGO_SETTINGS_MODULE = "core.settings_testing"
 asyncio_mode           = "auto"
 
 [tool.pyright]
-pythonPlatform = "Linux"
-pythonVersion  = "3.13"
+pythonPlatform   = "Linux"
+pythonVersion    = "3.13"
+typeCheckingMode = "strict"
 
 [tool.typos.default.extend-words]
 "acount" = "acount" # don't autocorrect Django models objects.acount to account
