@@ -86,3 +86,10 @@ skip-magic-trailing-comma  = false
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "core.settings_testing"
 asyncio_mode           = "auto"
+
+[tool.pyright]
+pythonPlatform = "Linux"
+pythonVersion  = "3.13"
+
+[tool.typos.default.extend-words]
+"acount" = "acount" # don't autocorrect Django models objects.acount to account
