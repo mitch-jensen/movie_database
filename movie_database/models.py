@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.db.models import Manager
 
 
 class MediaFormat(models.TextChoices):
@@ -16,11 +17,13 @@ class MediaFormat(models.TextChoices):
 class MediaCaseDimensions(models.Model):
     """Represents the dimensions of a media case."""
 
+    id: int
     media_format = models.CharField(max_length=3, choices=MediaFormat.choices)
     description = models.CharField(max_length=255, blank=False)
     width = models.DecimalField(max_digits=5, decimal_places=2)
     height = models.DecimalField(max_digits=5, decimal_places=2)
     depth = models.DecimalField(max_digits=5, decimal_places=2)
+    physical_media_set: Manager["PhysicalMedia"]
 
     class Meta:  # noqa: D106
         verbose_name = "Media Case Dimensions"
@@ -33,9 +36,11 @@ class MediaCaseDimensions(models.Model):
 class ShelfDimensions(models.Model):
     """Represents the dimensions of a shelf."""
 
+    id: int
     width = models.DecimalField(max_digits=5, decimal_places=2)
     height = models.DecimalField(max_digits=5, decimal_places=2)
     depth = models.DecimalField(max_digits=5, decimal_places=2)
+    shelves: Manager["Shelf"]
 
     class Meta:  # noqa: D106
         verbose_name = "Shelf Dimensions"
@@ -55,18 +60,26 @@ class PhysicalMediaOrientation(models.TextChoices):
 class Shelf(models.Model):
     """Represents a shelf in a bookcase."""
 
+    id: int
     position_from_top = models.PositiveSmallIntegerField()
-    bookcase = models.ForeignKey("Bookcase", on_delete=models.CASCADE, related_name="shelves")
-    dimensions = models.ForeignKey(
-        ShelfDimensions,
+    bookcase_id: int
+    bookcase = models.ForeignKey["Bookcase"](
+        "Bookcase",
+        on_delete=models.CASCADE,
+        related_name="shelves",
+    )
+    dimensions_id: int
+    dimensions = models.ForeignKey["ShelfDimensions"](
+        "ShelfDimensions",
         on_delete=models.PROTECT,
-        related_name="shelf_dimensions",
+        related_name="shelves",
     )
     orientation = models.CharField(
         max_length=1,
         choices=PhysicalMediaOrientation.choices,
         default=PhysicalMediaOrientation.VERTICAL,
     )
+    physical_media_set: Manager["PhysicalMedia"]
 
     class Meta:  # noqa: D106
         ordering = ("position_from_top",)
@@ -89,11 +102,11 @@ class Shelf(models.Model):
     def used_space(self) -> Decimal:
         """Return the amount of shelf space used up physical media."""
         # If there are no physical media on the shelf, there's no used space
-        if not self.physicalmedia_set.exists():
+        if not self.physical_media_set.exists():
             return Decimal(0)
 
         aggregation_field = f"case_dimensions__{'height' if self.orientation == PhysicalMediaOrientation.VERTICAL.value else 'width'}"
-        used: dict[str, Decimal] = self.physicalmedia_set.select_related("case_dimensions").aggregate(used_space=models.Sum(aggregation_field))
+        used: dict[str, Decimal] = self.physical_media_set.select_related("case_dimensions").aggregate(used_space=models.Sum(aggregation_field))
         return used["used_space"]
 
     def available_space(self) -> Decimal:
@@ -117,9 +130,11 @@ class Shelf(models.Model):
 class Bookcase(models.Model):
     """Represents a physical bookcase/shelf where movies are stored."""
 
+    id: int
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=255)
     location = models.CharField(max_length=255)
+    shelves: Manager["Shelf"]
 
     def __str__(self) -> str:  # noqa: D105
         return f"<Bookcase: {self.name}>"
@@ -128,13 +143,29 @@ class Bookcase(models.Model):
 class Movie(models.Model):
     """Represents a movie linked to a TMDb profile."""
 
+    id: int
     title = models.CharField(max_length=255)
-    release_year = models.PositiveSmallIntegerField(validators=[MinValueValidator(1888), MaxValueValidator(2100)])
+    release_year = models.PositiveSmallIntegerField(
+        validators=[
+            MinValueValidator(1888),
+            MaxValueValidator(2100),
+        ],
+    )
     letterboxd_uri = models.URLField()
     watched = models.BooleanField(default=False)
+    physical_media_set: Manager["PhysicalMedia"]
 
     class Meta:  # noqa: D106
-        constraints = (models.UniqueConstraint(fields=["title", "release_year", "letterboxd_uri"], name="unique_movie"),)
+        constraints = (
+            models.UniqueConstraint(
+                fields=[
+                    "title",
+                    "release_year",
+                    "letterboxd_uri",
+                ],
+                name="unique_movie",
+            ),
+        )
 
     def __str__(self) -> str:  # noqa: D105
         return f"<Movie: {self.title} ({self.release_year})>"
@@ -143,7 +174,13 @@ class Movie(models.Model):
 class TMDbProfile(models.Model):
     """Metadata from The Movie Database (TMDb)."""
 
-    movie = models.OneToOneField(Movie, on_delete=models.CASCADE, related_name="tmdb")
+    id: int
+    movie_id: int
+    movie = models.OneToOneField["Movie"](
+        "Movie",
+        on_delete=models.CASCADE,
+        related_name="tmdb",
+    )
     tmdb_id = models.PositiveIntegerField(unique=True)
 
     def __str__(self) -> str:  # noqa: D105
@@ -153,7 +190,9 @@ class TMDbProfile(models.Model):
 class Collection(models.Model):
     """Represents a collection of movies by a distributor."""
 
+    id: int
     name = models.CharField(max_length=255)
+    physical_media_set: Manager["PhysicalMedia"]
 
     def __str__(self) -> str:  # noqa: D105
         return f"<Collection: {self.name}>"
@@ -167,20 +206,34 @@ class Collection(models.Model):
 class PhysicalMedia(models.Model):
     """A physical copy of one or more movies (e.g., a DVD, Blu-ray)."""
 
-    movies = models.ManyToManyField(Movie, related_name="media_copies", blank=False)
-    shelf = models.ForeignKey(Shelf, on_delete=models.SET_NULL, null=True, blank=True)
-    position_on_shelf = models.PositiveSmallIntegerField(null=True, blank=True)
-    case_dimensions = models.ForeignKey(
-        MediaCaseDimensions,
-        on_delete=models.PROTECT,
-        related_name="media_dimensions",
+    id: int
+    movies = models.ManyToManyField["Movie", models.Model](
+        "Movie",
+        related_name="physical_media_set",
+        blank=False,
     )
-    collection = models.ForeignKey(
-        Collection,
+    shelf_id: int | None
+    shelf = models.ForeignKey["Shelf"](
+        "Shelf",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="physical_media",
+        related_name="physical_media_set",
+    )
+    position_on_shelf = models.PositiveSmallIntegerField(null=True, blank=True)
+    case_dimensions_id: int
+    case_dimensions = models.ForeignKey["MediaCaseDimensions"](
+        "MediaCaseDimensions",
+        on_delete=models.PROTECT,
+        related_name="physical_media_set",
+    )
+    collection_id: int | None
+    collection = models.ForeignKey["Collection"](
+        "Collection",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="physical_media_set",
     )
     notes = models.TextField(blank=True)
 

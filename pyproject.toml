@@ -3,6 +3,8 @@ authors = [{ name = "Mitchell Jensen" }]
 dependencies = [
   "django (>=5.2,<6.0)",
   "django-ninja (>=1.4.3,<2)",
+  "django-stubs-ext (>=5.2.2,<6)",
+  "django-types (>=0.22.0,<1)",
   "gunicorn (>=23.0.0,<24)",
   "psycopg[binary,pool]>=3.2.9",
   "pydantic (>=2.11.7,<3)",
