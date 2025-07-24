@@ -99,28 +99,28 @@ class Shelf(models.Model):
             return media.case_dimensions.height <= self.dimensions.height
         return media.case_dimensions.width <= self.dimensions.width
 
-    def used_space(self) -> Decimal:
+    async def used_space(self) -> Decimal:
         """Return the amount of shelf space used up physical media."""
         # If there are no physical media on the shelf, there's no used space
-        if not self.physical_media_set.exists():
+        if not await self.physical_media_set.aexists():
             return Decimal(0)
 
         aggregation_field = f"case_dimensions__{'height' if self.orientation == PhysicalMediaOrientation.VERTICAL.value else 'width'}"
-        used: dict[str, Decimal] = self.physical_media_set.select_related("case_dimensions").aggregate(used_space=models.Sum(aggregation_field))
+        used: dict[str, Decimal] = await self.physical_media_set.select_related("case_dimensions").aaggregate(used_space=models.Sum(aggregation_field))
         return used["used_space"]
 
-    def available_space(self) -> Decimal:
+    async def available_space(self) -> Decimal:
         """Return remaining usable width (VERTICAL) or height (HORIZONTAL) in mm."""
         total_space = self.dimensions.height if self.orientation == PhysicalMediaOrientation.VERTICAL.value else self.dimensions.width
-        return total_space - self.used_space()
+        return total_space - await self.used_space()
 
-    def can_accommodate(self, media: "PhysicalMedia") -> bool:
+    async def can_accommodate(self, media: "PhysicalMedia") -> bool:
         """Check if a PhysicalMedia fits based on both dimensions and available space."""
         # If shelf physically cannot fit media, return early
         if not self.can_fit_media(media):
             return False
 
-        available_space = self.available_space()
+        available_space: Decimal = await self.available_space()
 
         if self.orientation == PhysicalMediaOrientation.VERTICAL.value:
             return media.case_dimensions.width <= available_space
@@ -198,7 +198,7 @@ class Collection(models.Model):
         return f"<Collection: {self.name}>"
 
     @property
-    async def movies(self) -> models.QuerySet[Movie]:
+    def movies(self) -> models.QuerySet[Movie]:
         """Return a QuerySet of all movies associated with this collection."""
         return Movie.objects.filter(media_copies__collection=self)
 
