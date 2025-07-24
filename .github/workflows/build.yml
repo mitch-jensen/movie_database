@@ -34,31 +34,16 @@ jobs:
           skip-extraction: ${{ steps.cache.outputs.cache-hit }}
 
       - name: Build
-        uses: docker/build-push-action@v6.18.0
+        uses: docker/bake-action@v6.8.0
         with:
           context: .
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          file: docker/Dockerfile
+          files: docker/compose.prod.yml
           load: true
-          target: production
-          tags: mitch-jensen/movie_database:ci
-
-      - name: Setup Python and uv
-        uses: astral-sh/setup-uv@v6.3.1
+          set: |
+            *.cache-from=type=gha
+            *.cache-to=type=gha,mode=max
 
       - name: Run Docker infra tests
         run: |
-          uv sync --all-groups
-          uv run --frozen pytest docker/tests
-
-      - name: Push
-        uses: docker/build-push-action@v6.18.0
-        if: github.event_name != 'pull_request'
-        with:
-          context: .
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          file: docker/Dockerfile
-          target: production
-          tags: mitch-jensen/movie_database:${{ github.event_name == 'release' && github.event.release.tag_name || 'latest' }}
+          curl -fsSL https://goss.rocks/install | sh
+          dgoss run mitch-jensen/movie_database

@@ -9,6 +9,8 @@ services:
       target: development
       context: ..
       dockerfile: docker/Dockerfile  # Dockerfile path is relative to context
+      tags:
+        - mitch-jensen/movie_database:development
     depends_on:
       - db
     environment:

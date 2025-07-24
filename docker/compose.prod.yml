@@ -9,6 +9,8 @@ services:
       target: production
       context: ..
       dockerfile: docker/Dockerfile  # Dockerfile path is relative to context
+      tags:
+        - mitch-jensen/movie_database:latest
     volumes:
       - static:/app/static
     depends_on:
