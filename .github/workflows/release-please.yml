@@ -1,5 +1,5 @@
 ---
-name: release-please
+name: Semantic Release
 
 "on":
   push:

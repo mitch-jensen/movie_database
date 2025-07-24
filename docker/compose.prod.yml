@@ -1,0 +1,22 @@
+name: Production
+
+include:
+  - compose.core.yml
+
+services:
+  django:
+    build:
+      target: production
+      context: ..
+      dockerfile: docker/Dockerfile  # Dockerfile path is relative to context
+      tags:
+        - mitch-jensen/movie_database:latest
+    volumes:
+      - static:/app/static
+    depends_on:
+      - db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-error}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-error}
+      POSTGRES_DB: ${POSTGRES_DB:-error}
+      SECRET_KEY: ${SECRET_KEY:-error}

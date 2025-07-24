@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:17.5-alpine3.22
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-error}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-error}
+      POSTGRES_DB: ${POSTGRES_DB:-error}
+
+  caddy:
+    image: caddy:2.10.0-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ../Caddyfile:/etc/caddy/Caddyfile
+      - static:/app/static:ro
+
+volumes:
+  static:
+  db_data:

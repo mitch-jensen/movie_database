@@ -1,0 +1,26 @@
+file:
+  /goss/docker_output.log:
+    exists: true
+  /app:
+    exists: true
+    owner: python
+    group: python
+    filetype: directory
+port:
+  tcp:8000:
+    listening: true
+    ip:
+      - 0.0.0.0
+command:
+  pip freeze:
+    exit-status: 0
+    stdout:
+      - Django==5.2.4
+    stderr: []
+    timeout: 10000
+user:
+  python:
+    exists: true
+    username: python
+    uid: 1000
+    gid: 1000

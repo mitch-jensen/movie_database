@@ -1,0 +1,32 @@
+name: Development
+
+include:
+  - compose.core.yml
+
+services:
+  django:
+    build:
+      target: development
+      context: ..
+      dockerfile: docker/Dockerfile  # Dockerfile path is relative to context
+      tags:
+        - mitch-jensen/movie_database:development
+    depends_on:
+      - db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-error}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-error}
+      POSTGRES_DB: ${POSTGRES_DB:-error}
+      SECRET_KEY: ${SECRET_KEY:-error}
+    develop:
+      watch:
+        - action: sync
+          path: ../core
+          target: /app/core
+
+        - action: sync
+          path: ../movie_database
+          target: /app/movie_database
+
+        - action: rebuild
+          path: ../pyproject.toml

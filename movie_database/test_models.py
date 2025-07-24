@@ -254,7 +254,7 @@ class TestMediaCaseDimension:
     def test_bluray_us_standard_exists(self):
         """Test if the Blu-ray US Standard dimensions exist."""
         assert MediaCaseDimensions.objects.filter(
-            media_format="Blu-ray",
+            media_format="BD",
             description="Blu-ray (US Standard)",
             width=128.50,
             height=148.00,
@@ -265,7 +265,7 @@ class TestMediaCaseDimension:
     def test_bluray_uk_standard_exists(self):
         """Test if the Blu-ray UK Standard dimensions exist."""
         assert MediaCaseDimensions.objects.filter(
-            media_format="Blu-ray",
+            media_format="BD",
             description="Blu-ray (UK Standard)",
             width=148.00,
             height=129.00,
