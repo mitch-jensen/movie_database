@@ -212,7 +212,7 @@ class TestShelfAccommodation:
         """Test that Shelf.used_space is always the sum of physical media widths varying numbers of physical media present."""
         media = [baker.make(PhysicalMedia, case_dimensions__height=media_width) for media_width in media_heights]
         shelf = baker.make(Shelf, dimensions__height=shelf_height, orientation=PhysicalMediaOrientation.VERTICAL)
-        shelf.physicalmedia_set.add(*media)
+        shelf.physical_media_set.add(*media)
 
         assert shelf.used_space() == expected_used_space
 
@@ -230,7 +230,7 @@ class TestShelfAccommodation:
         """Test that Shelf.used_space is always the sum of physical media widths varying numbers of physical media present."""
         media = [baker.make(PhysicalMedia, case_dimensions__width=media_width) for media_width in media_widths]
         shelf = baker.make(Shelf, dimensions__width=shelf_width, orientation=PhysicalMediaOrientation.HORIZONTAL)
-        shelf.physicalmedia_set.add(*media)
+        shelf.physical_media_set.add(*media)
 
         assert shelf.used_space() == expected_used_space
 
@@ -321,7 +321,9 @@ class TestPhysicalMedia:
         shelf: Shelf = baker.make("Shelf", position_from_top=1, bookcase=bookcase)
         media: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie], shelf=shelf)
 
+        assert media.shelf is not None
         assert media.shelf == shelf
+        assert media.shelf.bookcase is not None
         assert media.shelf.bookcase == bookcase
 
     @pytest.mark.django_db
@@ -368,15 +370,15 @@ class TestCollection:
     @pytest.mark.django_db
     def test_collection_can_have_physical_media(self):
         """Test creating a collection."""
-        movie1 = baker.make("Movie", title="Movie 1")
-        movie2 = baker.make("Movie", title="Movie 2")
+        movie1: Movie = baker.make("Movie", title="Movie 1")
+        movie2: Movie = baker.make("Movie", title="Movie 2")
         physical_media1: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie1])
         physical_media2: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie2])
         collection = Collection.objects.create(name="Test Collection")
-        collection.physical_media.add(physical_media1, physical_media2)
+        collection.physical_media_set.add(physical_media1, physical_media2)
 
         assert collection.name == "Test Collection"
-        assert collection.physical_media.count() == 2
+        assert collection.physical_media_set.count() == 2
         assert collection.movies.count() == 2
         assert list(collection.movies.values_list("title", flat=True)) == ["Movie 1", "Movie 2"]
 
@@ -391,9 +393,9 @@ class TestCollection:
         physical_media1: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie1, movie2, movie3])
         physical_media2: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie3, movie4, movie5])
         collection = Collection.objects.create(name="Test Collection")
-        collection.physical_media.add(physical_media1, physical_media2)
+        collection.physical_media_set.add(physical_media1, physical_media2)
 
-        assert collection.physical_media.count() == 2
+        assert collection.physical_media_set.count() == 2
         assert collection.movies.count() == 6
         assert collection.movies.distinct().count() == 5
         assert list(collection.movies.distinct().values_list("title", flat=True)) == [
