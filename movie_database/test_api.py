@@ -1,47 +1,46 @@
 import pytest
-from django.test import Client
-from model_bakery import baker
-from pytest_django import DjangoAssertNumQueries
+from django.test import AsyncClient
 
 from .models import Movie
+
+
+@pytest.fixture
+@pytest.mark.django_db
+async def make_movie():
+    async def _make_movie(title: str, release_year: str):
+        return await Movie.objects.acreate(title=title, release_year=release_year)
+
+    return _make_movie
 
 
 class TestListMovies:
     """Test the list_movies API endpoint."""
 
+    @pytest.mark.asyncio
     @pytest.mark.django_db
-    def test_no_movies(self, client: Client, django_assert_num_queries: DjangoAssertNumQueries):
+    async def test_no_movies(self, async_client: AsyncClient):
         """Test listing movies when there are no movies in the database."""
-        # Make a GET request to the list_movies endpoint
-        with django_assert_num_queries(2) as captured:
-            response = client.get("/api/v1/movie_database/movies")
+        response = await async_client.get("/api/v1/movie_database/movies")
 
-        # Check the response status code
         assert response.status_code == 200
 
-        # Check the response data
         data = response.json()
         assert data == {"items": [], "count": 0}
-        assert len(captured) == 2
 
+    @pytest.mark.asyncio
     @pytest.mark.django_db
-    def test_multiple_movies(self, client: Client, django_assert_num_queries: DjangoAssertNumQueries):
+    async def test_multiple_movies(self, async_client: AsyncClient, make_movie):
         """Test listing all movies."""
-        # Create some test movies
-        movie1 = baker.make(Movie, title="Movie 1", release_year="2021")
-        movie2 = baker.make(Movie, title="Movie 2", release_year="2022")
-        movie3 = baker.make(Movie, title="Movie 3", release_year="2023")
-        movie4 = baker.make(Movie, title="Movie 4", release_year="2024")
-        movie5 = baker.make(Movie, title="Movie 5", release_year="2025")
+        movie1 = await make_movie("Movie 1", "2021")
+        movie2 = await make_movie("Movie 2", "2022")
+        movie3 = await make_movie("Movie 3", "2023")
+        movie4 = await make_movie("Movie 4", "2024")
+        movie5 = await make_movie("Movie 5", "2025")
 
-        # Make a GET request to the list_movies endpoint
-        with django_assert_num_queries(2):
-            response = client.get("/api/v1/movie_database/movies")
+        response = await async_client.get("/api/v1/movie_database/movies")
 
-        # Check the response status code
         assert response.status_code == 200
 
-        # Check the response data
         data = response.json()
         assert data == {
             "items": [

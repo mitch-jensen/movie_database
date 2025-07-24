@@ -24,7 +24,7 @@ RUN mkdir ./static
 
 COPY . .
 
-CMD ["python3", "-m", "uvicorn", "core.asgi:application", "--host=0.0.0.0", "--port=8000"]
+CMD ["gunicorn", "core.asgi:application"]
 
 FROM base AS development
 
@@ -46,4 +46,4 @@ WORKDIR /app
 
 COPY . .
 
-CMD ["python3", "-m", "uvicorn", "core.asgi:application", "--host=0.0.0.0", "--port=8000", "--reload"]
+CMD ["gunicorn", "core.asgi:application"]
