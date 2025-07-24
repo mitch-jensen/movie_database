@@ -45,6 +45,7 @@ jobs:
           tags: mitch-jensen/movie_database:ci
 
       - name: Run Docker infra tests
+        working-directory: docker/tests
         run: |
           curl -fsSL https://goss.rocks/install | sh
           dgoss run mitch-jensen/movie_database:ci
