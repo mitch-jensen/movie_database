@@ -159,7 +159,7 @@ class Collection(models.Model):
         return f"<Collection: {self.name}>"
 
     @property
-    def movies(self) -> models.QuerySet[Movie]:
+    async def movies(self) -> models.QuerySet[Movie]:
         """Return a QuerySet of all movies associated with this collection."""
         return Movie.objects.filter(media_copies__collection=self)
 
