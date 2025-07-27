@@ -1,10 +1,44 @@
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable
+from typing import Protocol
 
 import pytest
 
-from movie_database.models import Movie
+from movie_database.models import Bookcase, Movie
 
-type MovieCreator = Callable[[str, str, str, bool], Awaitable[Movie]]
+
+class BookcaseCreator(Protocol):  # noqa: D101
+    def __call__(  # noqa: D102
+        self,
+        name: str,
+        description: str = ...,
+        location: str = ...,
+    ) -> Awaitable[Bookcase]: ...
+
+
+class MovieCreator(Protocol):  # noqa: D101
+    def __call__(  # noqa: D102
+        self,
+        title: str,
+        release_year: str,
+        letterboxd_uri: str = ...,
+        watched: bool = ...,  # noqa: FBT001
+    ) -> Awaitable[Movie]: ...
+
+
+@pytest.fixture
+@pytest.mark.django_db
+async def make_bookcase() -> BookcaseCreator:
+    """Make a bookcase.
+
+    Returns:
+        BookcaseCreator: a factory function to create a Bookcase object.
+
+    """
+
+    async def _make_bookcase(name: str, description: str = "", location: str = "") -> Bookcase:
+        return await Bookcase.objects.acreate(name=name, description=description, location=location)
+
+    return _make_bookcase
 
 
 @pytest.fixture

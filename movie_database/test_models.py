@@ -4,6 +4,8 @@ import pytest
 from django.db import IntegrityError
 from model_bakery import baker
 
+from movie_database.conftest import BookcaseCreator, MovieCreator
+
 from .models import Bookcase, Collection, MediaCaseDimensions, Movie, PhysicalMedia, PhysicalMediaOrientation, Shelf, ShelfDimensions, TMDbProfile
 
 
@@ -11,9 +13,10 @@ class TestBookcase:
     """Test class for the Bookcase model."""
 
     @pytest.mark.django_db
-    def test_str_method(self):
+    @pytest.mark.asyncio
+    async def test_str_method(self, make_bookcase: BookcaseCreator):
         """Test the string representation of the Bookcase model."""
-        bookcase = Bookcase.objects.create(name="Test Bookcase")
+        bookcase: Bookcase = await make_bookcase(name="Test Bookcase")
         assert str(bookcase) == "<Bookcase: Test Bookcase>"
 
 
@@ -453,7 +456,8 @@ class TestMovie:
     """Test class for the Movie model."""
 
     @pytest.mark.django_db
-    def test_str_method(self):
+    @pytest.mark.asyncio
+    async def test_str_method(self, make_movie: MovieCreator):
         """Test the string representation of the Movie model."""
-        movie = Movie.objects.create(title="Test Movie", release_year=1998)
+        movie: Movie = await make_movie(title="Test Movie", release_year="1998")
         assert str(movie) == "<Movie: Test Movie (1998)>"
