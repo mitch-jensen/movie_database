@@ -1,10 +1,11 @@
+import random
 from collections.abc import Awaitable
 from decimal import Decimal
 from typing import Protocol
 
 import pytest
 
-from movie_database.models import Bookcase, Collection, MediaCaseDimensions, MediaFormat, Movie
+from movie_database.models import Bookcase, Collection, MediaCaseDimensions, MediaFormat, Movie, PhysicalMediaOrientation, Shelf, ShelfDimensions
 
 
 class BookcaseCreator(Protocol):  # noqa: D101
@@ -44,8 +45,26 @@ class MovieCreator(Protocol):  # noqa: D101
     ) -> Awaitable[Movie]: ...
 
 
+class ShelfCreator(Protocol):  # noqa: D101
+    def __call__(  # noqa: D102
+        self,
+        position_from_top: int,
+        bookcase: Bookcase,
+        dimensions: ShelfDimensions = ...,
+        orientation: PhysicalMediaOrientation = ...,
+    ) -> Awaitable[Shelf]: ...
+
+
+class ShelfDimensionCreator(Protocol):  # noqa: D101
+    def __call__(  # noqa: D102
+        self,
+        width: Decimal = ...,
+        height: Decimal = ...,
+        depth: Decimal = ...,
+    ) -> Awaitable[ShelfDimensions]: ...
+
+
 @pytest.fixture
-@pytest.mark.django_db
 async def make_bookcase() -> BookcaseCreator:
     """Make a bookcase.
 
@@ -61,7 +80,6 @@ async def make_bookcase() -> BookcaseCreator:
 
 
 @pytest.fixture
-@pytest.mark.django_db
 async def make_collection() -> CollectionCreator:
     """Make a collection.
 
@@ -77,7 +95,6 @@ async def make_collection() -> CollectionCreator:
 
 
 @pytest.fixture
-@pytest.mark.django_db
 async def make_media_case_dimensions() -> MediaCaseDimensionCreator:
     """Make a MediaCaseDimensions object.
 
@@ -93,7 +110,6 @@ async def make_media_case_dimensions() -> MediaCaseDimensionCreator:
 
 
 @pytest.fixture
-@pytest.mark.django_db
 async def make_movie() -> MovieCreator:
     """Make a movie.
 
@@ -106,3 +122,43 @@ async def make_movie() -> MovieCreator:
         return await Movie.objects.acreate(title=title, release_year=release_year, letterboxd_uri=letterboxd_uri, watched=watched)
 
     return _make_movie
+
+
+@pytest.fixture
+async def make_shelf(make_shelf_dimensions: ShelfDimensionCreator) -> ShelfCreator:
+    """Make a shelf.
+
+    Returns:
+        ShelfCreator: a factory function to create a Shelf object.
+
+    """
+
+    async def _make_shelf(
+        position_from_top: int,
+        bookcase: Bookcase,
+        dimensions: ShelfDimensions | None = None,
+        orientation: PhysicalMediaOrientation | None = None,
+    ) -> Shelf:
+        _dimensions: ShelfDimensions = dimensions or await make_shelf_dimensions()
+        _orientation: PhysicalMediaOrientation = orientation or PhysicalMediaOrientation.HORIZONTAL
+        return await Shelf.objects.acreate(position_from_top=position_from_top, bookcase=bookcase, dimensions=_dimensions, orientation=_orientation)
+
+    return _make_shelf
+
+
+@pytest.fixture
+async def make_shelf_dimensions() -> ShelfDimensionCreator:
+    """Make a ShelfDimensions object.
+
+    Returns:
+        ShelfDimensionCreator: a factory function to create a ShelfDimensions object.
+
+    """
+
+    async def _make_shelf_dimensions(width: Decimal | None = None, height: Decimal | None = None, depth: Decimal | None = None) -> ShelfDimensions:
+        _width: Decimal = width or Decimal(str(random.uniform(90.0, 128.0)))  # noqa: S311
+        _height = height or Decimal(str(random.uniform(90.0, 128.0)))  # noqa: S311
+        _depth = depth or Decimal(str(random.uniform(90.0, 128.0)))  # noqa: S311
+        return await ShelfDimensions.objects.acreate(width=_width, height=_height, depth=_depth)
+
+    return _make_shelf_dimensions

@@ -4,9 +4,9 @@ import pytest
 from django.db import IntegrityError
 from model_bakery import baker
 
-from movie_database.conftest import BookcaseCreator, CollectionCreator, MediaCaseDimensionCreator, MovieCreator
+from movie_database.conftest import BookcaseCreator, CollectionCreator, MediaCaseDimensionCreator, MovieCreator, ShelfCreator
 
-from .models import Bookcase, Collection, MediaCaseDimensions, MediaFormat, Movie, PhysicalMedia, PhysicalMediaOrientation, Shelf, ShelfDimensions, TMDbProfile
+from .models import Bookcase, Collection, MediaCaseDimensions, MediaFormat, Movie, PhysicalMedia, PhysicalMediaOrientation, Shelf, TMDbProfile
 
 
 class TestBookcase:
@@ -24,26 +24,24 @@ class TestShelf:
     """Test class for the Shelf model."""
 
     @pytest.mark.django_db
-    def test_str_method(self):
+    @pytest.mark.asyncio
+    async def test_str_method(self, make_bookcase: BookcaseCreator, make_shelf: ShelfCreator):
         """Test the string representation of the Shelf model."""
-        bookcase: Bookcase = baker.make(Bookcase, name="Test Bookcase")
-        dimensions: ShelfDimensions = baker.make(ShelfDimensions)
-        shelf = Shelf.objects.create(
+        bookcase: Bookcase = await make_bookcase(name="Test Bookcase")
+        shelf: Shelf = await make_shelf(
             position_from_top=3,
             bookcase=bookcase,
-            dimensions=dimensions,
         )
         assert str(shelf) == "<Shelf: Test Bookcase - 3>"
 
     @pytest.mark.django_db
-    def test_shelf_creation(self):
+    @pytest.mark.asyncio
+    async def test_shelf_creation(self, make_bookcase: BookcaseCreator, make_shelf: ShelfCreator):
         """Test creating a shelf."""
-        bookcase: Bookcase = baker.make("Bookcase")
-        dimensions: ShelfDimensions = baker.make(ShelfDimensions)
-        shelf = Shelf.objects.create(
+        bookcase: Bookcase = await make_bookcase(name="Test Bookcase")
+        shelf: Shelf = await make_shelf(
             position_from_top=1,
             bookcase=bookcase,
-            dimensions=dimensions,
         )
 
         assert shelf.position_from_top == 1
@@ -51,27 +49,34 @@ class TestShelf:
         assert str(shelf) == f"<Shelf: {bookcase.name} - {shelf.position_from_top}>"
 
     @pytest.mark.django_db
-    def test_shelf_creation_with_duplicate_position(self):
+    @pytest.mark.asyncio
+    async def test_shelf_creation_with_duplicate_position(
+        self,
+        make_bookcase: BookcaseCreator,
+        make_shelf: ShelfCreator,
+    ):
         """Test creating a shelf with duplicate position."""
-        bookcase: Bookcase = baker.make("Bookcase")
-        dimensions: ShelfDimensions = baker.make(ShelfDimensions)
-        Shelf.objects.create(
+        bookcase: Bookcase = await make_bookcase(name="Test Bookcase")
+        _shelf: Shelf = await make_shelf(
             position_from_top=1,
             bookcase=bookcase,
-            dimensions=dimensions,
         )
 
         with pytest.raises(IntegrityError):
-            Shelf.objects.create(position_from_top=1, bookcase=bookcase)
+            await Shelf.objects.acreate(position_from_top=1, bookcase=bookcase)
 
     @pytest.mark.django_db
-    def test_shelves_with_same_position_in_different_bookcases(self):
+    @pytest.mark.asyncio
+    async def test_shelves_with_same_position_in_different_bookcases(
+        self,
+        make_bookcase: BookcaseCreator,
+        make_shelf: ShelfCreator,
+    ):
         """Shelves with the same position should be allowed in different bookcases."""
-        bookcase1: Bookcase = baker.make("Bookcase")
-        bookcase2: Bookcase = baker.make("Bookcase")
-        dimensions: ShelfDimensions = baker.make(ShelfDimensions)
-        shelf1 = Shelf.objects.create(position_from_top=1, bookcase=bookcase1, dimensions=dimensions)
-        shelf2 = Shelf.objects.create(position_from_top=1, bookcase=bookcase2, dimensions=dimensions)
+        bookcase1: Bookcase = await make_bookcase("Test Bookcase 1")
+        bookcase2: Bookcase = await make_bookcase("Test Bookcase 2")
+        shelf1 = await make_shelf(position_from_top=1, bookcase=bookcase1)
+        shelf2 = await make_shelf(position_from_top=1, bookcase=bookcase2)
 
         assert shelf1.position_from_top == 1
         assert shelf1.bookcase == bookcase1
@@ -80,27 +85,27 @@ class TestShelf:
         assert shelf2.bookcase == bookcase2
 
     @pytest.mark.django_db
-    def test_shelf_ordering(self):
+    @pytest.mark.asyncio
+    async def test_shelf_ordering(self, make_bookcase: BookcaseCreator, make_shelf: ShelfCreator):
         """Shelves should be ordered by position_from_top by default."""
-        bookcase: Bookcase = baker.make("Bookcase")
-        dimensions: ShelfDimensions = baker.make(ShelfDimensions)
-        Shelf.objects.create(position_from_top=3, bookcase=bookcase, dimensions=dimensions)
-        Shelf.objects.create(position_from_top=1, bookcase=bookcase, dimensions=dimensions)
-        Shelf.objects.create(position_from_top=2, bookcase=bookcase, dimensions=dimensions)
+        bookcase: Bookcase = await make_bookcase("Test Bookcase")
+        _shelf_1 = make_shelf(position_from_top=3, bookcase=bookcase)
+        _shelf_2 = make_shelf(position_from_top=1, bookcase=bookcase)
+        _shelf_3 = make_shelf(position_from_top=2, bookcase=bookcase)
 
-        positions: list[int] = list(bookcase.shelves.values_list("position_from_top", flat=True))
+        positions: list[int] = [position async for position in bookcase.shelves.values_list("position_from_top", flat=True)]
         assert positions == [1, 2, 3]
 
     @pytest.mark.django_db
-    def test_shelf_deletion_on_bookcase_delete(self):
+    @pytest.mark.asyncio
+    async def test_shelf_deletion_on_bookcase_delete(self, make_bookcase: BookcaseCreator, make_shelf: ShelfCreator):
         """Deleting a bookcase should delete its shelves."""
-        bookcase: Bookcase = baker.make("Bookcase")
-        dimensions: ShelfDimensions = baker.make(ShelfDimensions)
-        Shelf.objects.create(position_from_top=1, bookcase=bookcase, dimensions=dimensions)
-        Shelf.objects.create(position_from_top=2, bookcase=bookcase, dimensions=dimensions)
+        bookcase: Bookcase = await make_bookcase("Test Bookcase")
+        _shelf_1: Shelf = await make_shelf(position_from_top=1, bookcase=bookcase)
+        _shelf_2: Shelf = await make_shelf(position_from_top=2, bookcase=bookcase)
 
-        bookcase.delete()
-        assert Shelf.objects.count() == 0
+        await bookcase.adelete()
+        assert await Shelf.objects.acount() == 0
 
     @pytest.mark.django_db
     @pytest.mark.parametrize(
@@ -108,12 +113,12 @@ class TestShelf:
         [-1, -5, -10],
         ids=["negative_one", "negative_five", "negative_ten"],
     )
-    def test_shelf_invalid_position(self, position_from_top: int):
+    @pytest.mark.asyncio
+    async def test_shelf_invalid_position(self, position_from_top: int, make_bookcase: BookcaseCreator):
         """Shelves should not accept zero or negative positions."""
-        bookcase: Bookcase = baker.make("Bookcase")
-        dimensions: ShelfDimensions = baker.make(ShelfDimensions)
+        bookcase: Bookcase = await make_bookcase("Test Bookcase")
         with pytest.raises(IntegrityError):
-            Shelf.objects.create(position_from_top=position_from_top, bookcase=bookcase, dimensions=dimensions)
+            await Shelf.objects.acreate(position_from_top=position_from_top, bookcase=bookcase)
 
 
 class TestShelfAccommodation:
