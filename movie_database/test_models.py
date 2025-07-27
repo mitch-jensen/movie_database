@@ -4,9 +4,9 @@ import pytest
 from django.db import IntegrityError
 from model_bakery import baker
 
-from movie_database.conftest import BookcaseCreator, MovieCreator
+from movie_database.conftest import BookcaseCreator, MediaCaseDimensionCreator, MovieCreator
 
-from .models import Bookcase, Collection, MediaCaseDimensions, Movie, PhysicalMedia, PhysicalMediaOrientation, Shelf, ShelfDimensions, TMDbProfile
+from .models import Bookcase, Collection, MediaCaseDimensions, MediaFormat, Movie, PhysicalMedia, PhysicalMediaOrientation, Shelf, ShelfDimensions, TMDbProfile
 
 
 class TestBookcase:
@@ -242,49 +242,53 @@ class TestMediaCaseDimension:
     """Test class for the MediaCaseDimensions model."""
 
     @pytest.mark.django_db
-    def test_str_method(self):
+    @pytest.mark.asyncio
+    async def test_str_method(self, make_media_case_dimensions: MediaCaseDimensionCreator):
         """Test the string representation of the MediaCaseDimensions model."""
-        dimensions = MediaCaseDimensions(
-            media_format="DVD",
+        dimensions = await make_media_case_dimensions(
+            media_format=MediaFormat.DVD,
             description="DVD (Standard)",
-            width=100.01,
-            height=101.00,
-            depth=102.10,
+            width=Decimal("100.01"),
+            height=Decimal("101.00"),
+            depth=Decimal("102.10"),
         )
         assert str(dimensions) == "<MediaCaseDimensions (DVD): 100.01 x 101.00 x 102.10>"
 
     @pytest.mark.django_db
-    def test_bluray_us_standard_exists(self):
+    @pytest.mark.asyncio
+    async def test_bluray_us_standard_exists(self):
         """Test if the Blu-ray US Standard dimensions exist."""
-        assert MediaCaseDimensions.objects.filter(
-            media_format="BD",
+        assert await MediaCaseDimensions.objects.filter(
+            media_format=MediaFormat.BLURAY,
             description="Blu-ray (US Standard)",
             width=128.50,
             height=148.00,
             depth=12.00,
-        ).exists()
+        ).aexists()
 
     @pytest.mark.django_db
-    def test_bluray_uk_standard_exists(self):
+    @pytest.mark.asyncio
+    async def test_bluray_uk_standard_exists(self):
         """Test if the Blu-ray UK Standard dimensions exist."""
-        assert MediaCaseDimensions.objects.filter(
-            media_format="BD",
+        assert await MediaCaseDimensions.objects.filter(
+            media_format=MediaFormat.BLURAY,
             description="Blu-ray (UK Standard)",
             width=148.00,
             height=129.00,
             depth=14.00,
-        ).exists()
+        ).aexists()
 
     @pytest.mark.django_db
-    def test_dvd_standard_exists(self):
+    @pytest.mark.asyncio
+    async def test_dvd_standard_exists(self):
         """Test if the DVD Standard dimensions exist."""
-        assert MediaCaseDimensions.objects.filter(
-            media_format="DVD",
+        assert await MediaCaseDimensions.objects.filter(
+            media_format=MediaFormat.DVD,
             description="DVD (Standard)",
             width=130.00,
             height=184.00,
             depth=14.00,
-        ).exists()
+        ).aexists()
 
 
 class TestPhysicalMedia:

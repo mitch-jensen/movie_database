@@ -1,9 +1,10 @@
 from collections.abc import Awaitable
+from decimal import Decimal
 from typing import Protocol
 
 import pytest
 
-from movie_database.models import Bookcase, Movie
+from movie_database.models import Bookcase, MediaCaseDimensions, MediaFormat, Movie
 
 
 class BookcaseCreator(Protocol):  # noqa: D101
@@ -13,6 +14,17 @@ class BookcaseCreator(Protocol):  # noqa: D101
         description: str = ...,
         location: str = ...,
     ) -> Awaitable[Bookcase]: ...
+
+
+class MediaCaseDimensionCreator(Protocol):  # noqa: D101
+    def __call__(  # noqa: D102
+        self,
+        media_format: MediaFormat,
+        description: str,
+        width: Decimal,
+        height: Decimal,
+        depth: Decimal,
+    ) -> Awaitable[MediaCaseDimensions]: ...
 
 
 class MovieCreator(Protocol):  # noqa: D101
@@ -39,6 +51,22 @@ async def make_bookcase() -> BookcaseCreator:
         return await Bookcase.objects.acreate(name=name, description=description, location=location)
 
     return _make_bookcase
+
+
+@pytest.fixture
+@pytest.mark.django_db
+async def make_media_case_dimensions() -> MediaCaseDimensionCreator:
+    """Make a MediaCaseDimensions object.
+
+    Returns:
+        MediaCaseDimensionCreator: a factory function to create a MediaCaseDimensions object.
+
+    """
+
+    async def _make_media_case_dimensions(media_format: MediaFormat, description: str, width: Decimal, height: Decimal, depth: Decimal) -> MediaCaseDimensions:
+        return await MediaCaseDimensions.objects.acreate(media_format=media_format, description=description, width=width, height=height, depth=depth)
+
+    return _make_media_case_dimensions
 
 
 @pytest.fixture
