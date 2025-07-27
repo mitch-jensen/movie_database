@@ -1,24 +1,14 @@
-from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING
 
 import pytest
 from django.test.client import AsyncClient
 
-from .models import Movie
+from movie_database.conftest import MovieCreator
 
 if TYPE_CHECKING:
     from django.http import HttpResponse
 
-type MovieCreator = Callable[[str, str], Awaitable[Movie]]
-
-
-@pytest.fixture
-@pytest.mark.django_db
-async def make_movie() -> MovieCreator:
-    async def _make_movie(title: str, release_year: str) -> Movie:
-        return await Movie.objects.acreate(title=title, release_year=release_year)
-
-    return _make_movie
+    from .models import Movie
 
 
 class TestListMovies:
