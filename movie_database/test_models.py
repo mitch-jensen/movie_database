@@ -4,7 +4,7 @@ import pytest
 from django.db import IntegrityError
 from model_bakery import baker
 
-from movie_database.conftest import BookcaseCreator, MediaCaseDimensionCreator, MovieCreator
+from movie_database.conftest import BookcaseCreator, CollectionCreator, MediaCaseDimensionCreator, MovieCreator
 
 from .models import Bookcase, Collection, MediaCaseDimensions, MediaFormat, Movie, PhysicalMedia, PhysicalMediaOrientation, Shelf, ShelfDimensions, TMDbProfile
 
@@ -369,19 +369,21 @@ class TestCollection:
     """Test class for the Collection model."""
 
     @pytest.mark.django_db
-    def test_str_method(self):
+    @pytest.mark.asyncio
+    async def test_str_method(self, make_collection: CollectionCreator):
         """Test the string representation of the Collection model."""
-        collection = Collection.objects.create(name="Test Collection")
+        collection: Collection = await make_collection(name="Test Collection")
         assert str(collection) == "<Collection: Test Collection>"
 
     @pytest.mark.django_db
-    def test_collection_can_have_physical_media(self):
+    @pytest.mark.asyncio
+    async def test_collection_can_have_physical_media(self, make_collection: CollectionCreator):
         """Test creating a collection."""
         movie1: Movie = baker.make("Movie", title="Movie 1")
         movie2: Movie = baker.make("Movie", title="Movie 2")
         physical_media1: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie1])
         physical_media2: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie2])
-        collection = Collection.objects.create(name="Test Collection")
+        collection: Collection = await make_collection(name="Test Collection")
         collection.physical_media_set.add(physical_media1, physical_media2)
 
         assert collection.name == "Test Collection"
@@ -390,7 +392,8 @@ class TestCollection:
         assert list(collection.movies.values_list("title", flat=True)) == ["Movie 1", "Movie 2"]
 
     @pytest.mark.django_db
-    def test_collection_can_have_physical_media_with_multiple_movies(self):
+    @pytest.mark.asyncio
+    async def test_collection_can_have_physical_media_with_multiple_movies(self, make_collection: CollectionCreator):
         """Test that a collection can have multiple physical media."""
         movie1: Movie = baker.make("Movie", title="Movie 1")
         movie2: Movie = baker.make("Movie", title="Movie 2")
@@ -399,7 +402,7 @@ class TestCollection:
         movie5: Movie = baker.make("Movie", title="Movie 5")
         physical_media1: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie1, movie2, movie3])
         physical_media2: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie3, movie4, movie5])
-        collection = Collection.objects.create(name="Test Collection")
+        collection: Collection = await make_collection(name="Test Collection")
         collection.physical_media_set.add(physical_media1, physical_media2)
 
         assert collection.physical_media_set.count() == 2

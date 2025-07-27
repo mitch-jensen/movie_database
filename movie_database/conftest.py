@@ -4,7 +4,7 @@ from typing import Protocol
 
 import pytest
 
-from movie_database.models import Bookcase, MediaCaseDimensions, MediaFormat, Movie
+from movie_database.models import Bookcase, Collection, MediaCaseDimensions, MediaFormat, Movie
 
 
 class BookcaseCreator(Protocol):  # noqa: D101
@@ -14,6 +14,13 @@ class BookcaseCreator(Protocol):  # noqa: D101
         description: str = ...,
         location: str = ...,
     ) -> Awaitable[Bookcase]: ...
+
+
+class CollectionCreator(Protocol):  # noqa: D101
+    def __call__(  # noqa: D102
+        self,
+        name: str,
+    ) -> Awaitable[Collection]: ...
 
 
 class MediaCaseDimensionCreator(Protocol):  # noqa: D101
@@ -51,6 +58,22 @@ async def make_bookcase() -> BookcaseCreator:
         return await Bookcase.objects.acreate(name=name, description=description, location=location)
 
     return _make_bookcase
+
+
+@pytest.fixture
+@pytest.mark.django_db
+async def make_collection() -> CollectionCreator:
+    """Make a collection.
+
+    Returns:
+        CollectionCreator: a factory function to create a Collection object.
+
+    """
+
+    async def _make_collection(name: str) -> Collection:
+        return await Collection.objects.acreate(name=name)
+
+    return _make_collection
 
 
 @pytest.fixture
