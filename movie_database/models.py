@@ -169,6 +169,10 @@ class Movie(models.Model):
                 name="unique_movie",
             ),
         )
+        ordering = (
+            "release_year",
+            "title",
+        )
 
     def __str__(self) -> str:  # noqa: D105
         return f"<Movie: {self.title} ({self.release_year})>"
