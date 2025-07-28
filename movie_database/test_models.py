@@ -18,7 +18,7 @@ class TestBookcase:
     async def test_str_method(self, make_bookcase: BookcaseCreator):
         """Test the string representation of the Bookcase model."""
         bookcase: Bookcase = await make_bookcase(name="Test Bookcase")
-        assert str(bookcase) == "<Bookcase: Test Bookcase>"
+        assert str(bookcase) == "Test Bookcase"
 
 
 class TestShelf:
@@ -33,7 +33,7 @@ class TestShelf:
             position_from_top=3,
             bookcase=bookcase,
         )
-        assert str(shelf) == "<Shelf: Test Bookcase - 3>"
+        assert str(shelf) == "Test Bookcase - 3"
 
     @pytest.mark.django_db
     @pytest.mark.asyncio
@@ -279,7 +279,7 @@ class TestMediaCaseDimension:
             height=Decimal("101.00"),
             depth=Decimal("102.10"),
         )
-        assert str(dimensions) == "<MediaCaseDimensions (DVD): 100.01 x 101.00 x 102.10>"
+        assert str(dimensions) == "100.01W x 101.00H x 102.10D"
 
     @pytest.mark.django_db
     @pytest.mark.asyncio
@@ -335,7 +335,7 @@ class TestPhysicalMedia:
         bookcase: Bookcase = await make_bookcase(name="Test Bookcase")
         shelf: Shelf = await make_shelf(position_from_top=1, bookcase=bookcase)
         media: PhysicalMedia = await make_physical_media(movies=[movie], shelf=shelf)
-        assert await sync_to_async(str)(media) == "<PhysicalMedia: Test Movie (1998)>"
+        assert await sync_to_async(str)(media) == "Test Movie (1998)"
 
     @pytest.mark.django_db
     @pytest.mark.asyncio
@@ -354,7 +354,7 @@ class TestPhysicalMedia:
         shelf: Shelf = await make_shelf(position_from_top=1, bookcase=bookcase)
         media: PhysicalMedia = await make_physical_media(movies=[movie_1, movie_2], shelf=shelf)
 
-        assert await sync_to_async(str)(media) == "<PhysicalMedia: Movie 1 (1998), Movie 2 (1999)>"
+        assert await sync_to_async(str)(media) == "Movie 1 (1998), Movie 2 (1999)"
 
     @pytest.mark.django_db
     @pytest.mark.asyncio
@@ -450,7 +450,7 @@ class TestCollection:
     async def test_str_method(self, make_collection: CollectionCreator):
         """Test the string representation of the Collection model."""
         collection: Collection = await make_collection(name="Test Collection")
-        assert str(collection) == "<Collection: Test Collection>"
+        assert str(collection) == "Test Collection"
 
     @pytest.mark.django_db
     @pytest.mark.asyncio
@@ -514,7 +514,7 @@ class TestTMDbProfile:
         """Test the string representation of the TMDbProfile model."""
         movie: Movie = await make_movie(title="Test Movie", release_year="1998")
         tmdb_profile: TMDbProfile = await TMDbProfile.objects.acreate(movie=movie, tmdb_id=12345)
-        assert str(tmdb_profile) == "<TMDbProfile: 12345 - Test Movie>"
+        assert str(tmdb_profile) == "Test Movie"
 
     @pytest.mark.django_db
     @pytest.mark.asyncio
@@ -559,4 +559,4 @@ class TestMovie:
     async def test_str_method(self, make_movie: MovieCreator):
         """Test the string representation of the Movie model."""
         movie: Movie = await make_movie(title="Test Movie", release_year="1998")
-        assert str(movie) == "<Movie: Test Movie (1998)>"
+        assert str(movie) == "Test Movie (1998)"

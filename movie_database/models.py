@@ -32,8 +32,11 @@ class MediaCaseDimensions(models.Model):
         verbose_name = "Media Case Dimensions"
         verbose_name_plural = "Media Case Dimensions"
 
+    def __repr__(self) -> str:  # noqa: D105
+        return f"<MediaCaseDimensions ({self.media_format}): {self.width:.2f}W x {self.height:.2f}H x {self.depth:.2f}D>"
+
     def __str__(self) -> str:  # noqa: D105
-        return f"<MediaCaseDimensions ({self.media_format}): {self.width:.2f} x {self.height:.2f} x {self.depth:.2f}>"
+        return f"{self.width:.2f}W x {self.height:.2f}H x {self.depth:.2f}D"
 
 
 class ShelfDimensions(models.Model):
@@ -49,8 +52,11 @@ class ShelfDimensions(models.Model):
         verbose_name = "Shelf Dimensions"
         verbose_name_plural = "Shelf Dimensions"
 
-    def __str__(self) -> str:  # noqa: D105
+    def __repr__(self) -> str:  # noqa: D105
         return f"<ShelfDimensions: {self.width:.2f} x {self.height:.2f} x {self.depth:.2f}>"
+
+    def __str__(self) -> str:  # noqa: D105
+        return f"{self.width:.2f} x {self.height:.2f} x {self.depth:.2f}"
 
 
 class PhysicalMediaOrientation(models.TextChoices):
@@ -93,8 +99,11 @@ class Shelf(models.Model):
             ),
         )
 
-    def __str__(self) -> str:  # noqa: D105
+    def __repr__(self) -> str:  # noqa: D105
         return f"<Shelf: {self.bookcase.name} - {self.position_from_top}>"
+
+    def __str__(self) -> str:  # noqa: D105
+        return f"{self.bookcase.name} - {self.position_from_top}"
 
     def can_fit_media(self, media: "PhysicalMedia") -> bool:
         """Check if a single PhysicalMedia can physically fit on this shelf."""
@@ -139,8 +148,11 @@ class Bookcase(models.Model):
     location = models.CharField(max_length=255)
     shelves: "RelatedManager['Shelf']"
 
-    def __str__(self) -> str:  # noqa: D105
+    def __repr__(self) -> str:  # noqa: D105
         return f"<Bookcase: {self.name}>"
+
+    def __str__(self) -> str:  # noqa: D105
+        return self.name
 
 
 class Movie(models.Model):
@@ -174,8 +186,11 @@ class Movie(models.Model):
             "title",
         )
 
-    def __str__(self) -> str:  # noqa: D105
+    def __repr__(self) -> str:  # noqa: D105
         return f"<Movie: {self.title} ({self.release_year})>"
+
+    def __str__(self) -> str:  # noqa: D105
+        return f"{self.title} ({self.release_year})"
 
 
 class TMDbProfile(models.Model):
@@ -190,8 +205,11 @@ class TMDbProfile(models.Model):
     )
     tmdb_id = models.PositiveIntegerField(unique=True)
 
-    def __str__(self) -> str:  # noqa: D105
+    def __repr__(self) -> str:  # noqa: D105
         return f"<TMDbProfile: {self.tmdb_id} - {self.movie.title}>"
+
+    def __str__(self) -> str:  # noqa: D105
+        return self.movie.title
 
 
 class Collection(models.Model):
@@ -201,8 +219,11 @@ class Collection(models.Model):
     name = models.CharField(max_length=255)
     physical_media_set: "RelatedManager['PhysicalMedia']"
 
-    def __str__(self) -> str:  # noqa: D105
+    def __repr__(self) -> str:  # noqa: D105
         return f"<Collection: {self.name}>"
+
+    def __str__(self) -> str:  # noqa: D105
+        return self.name
 
     def get_movies(self) -> models.QuerySet[Movie]:
         """Return a QuerySet of all movies associated with this collection."""
@@ -254,6 +275,9 @@ class PhysicalMedia(models.Model):
             ),
         )
 
-    def __str__(self) -> str:  # noqa: D105
-        movie_titles = ", ".join(m.title for m in self.movies.all())
+    def __repr__(self) -> str:  # noqa: D105
+        movie_titles = ", ".join(f"{m.title} ({m.release_year})" for m in self.movies.all())
         return f"<PhysicalMedia: {movie_titles}>"
+
+    def __str__(self) -> str:  # noqa: D105
+        return ", ".join(f"{m.title} ({m.release_year})" for m in self.movies.all())
