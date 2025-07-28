@@ -1,10 +1,11 @@
 from decimal import Decimal
 
 import pytest
+from asgiref.sync import sync_to_async
 from django.db import IntegrityError
 from model_bakery import baker
 
-from movie_database.conftest import BookcaseCreator, CollectionCreator, MediaCaseDimensionCreator, MovieCreator, ShelfCreator
+from movie_database.conftest import BookcaseCreator, CollectionCreator, MediaCaseDimensionCreator, MovieCreator, PhysicalMediaCreator, ShelfCreator
 
 from .models import Bookcase, Collection, MediaCaseDimensions, MediaFormat, Movie, PhysicalMedia, PhysicalMediaOrientation, Shelf, TMDbProfile
 
@@ -142,7 +143,8 @@ class TestShelfAccommodation:
             "media higher than shelf by fractional margin",
         ],
     )
-    def test_can_fit_media_with_vertical_orientation(self, media_height: Decimal, shelf_height: Decimal, should_fit: bool):
+    @pytest.mark.asyncio
+    async def test_can_fit_media_with_vertical_orientation(self, media_height: Decimal, shelf_height: Decimal, should_fit: bool):
         """Test that Shelf.can_fit_media behaves correctly for vertical orientations."""
         media = baker.make(PhysicalMedia, case_dimensions__height=media_height)
         shelf = baker.make(Shelf, dimensions__height=shelf_height, orientation=PhysicalMediaOrientation.VERTICAL)
@@ -300,30 +302,60 @@ class TestPhysicalMedia:
     """Test class for the PhysicalMedia model."""
 
     @pytest.mark.django_db
-    def test_str_method_one_movie(self):
+    @pytest.mark.asyncio
+    async def test_str_method_one_movie(
+        self,
+        make_bookcase: BookcaseCreator,
+        make_movie: MovieCreator,
+        make_physical_media: PhysicalMediaCreator,
+        make_shelf: ShelfCreator,
+    ):
         """Test the string representation of the PhysicalMedia model."""
-        movie: Movie = baker.make("Movie", title="Test Movie")
-        media: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie])
-        assert str(media) == "<PhysicalMedia: Test Movie>"
+        movie: Movie = await make_movie(title="Test Movie", release_year="1998")
+        bookcase: Bookcase = await make_bookcase(name="Test Bookcase")
+        shelf: Shelf = await make_shelf(position_from_top=1, bookcase=bookcase)
+        media: PhysicalMedia = await make_physical_media(movies=[movie], shelf=shelf)
+        assert await sync_to_async(str)(media) == "<PhysicalMedia: Test Movie (1998)>"
 
     @pytest.mark.django_db
-    def test_str_method_multiple_movies(self):
+    @pytest.mark.asyncio
+    async def test_str_method_multiple_movies(
+        self,
+        make_bookcase: BookcaseCreator,
+        make_movie: MovieCreator,
+        make_physical_media: PhysicalMediaCreator,
+        make_shelf: ShelfCreator,
+    ):
         """Test the string representation of the PhysicalMedia model with multiple movies."""
-        movie1: Movie = baker.make("Movie", title="Movie 1")
-        movie2: Movie = baker.make("Movie", title="Movie 2")
-        media: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie1, movie2])
-        assert str(media) == "<PhysicalMedia: Movie 1, Movie 2>"
+        movie_1: Movie = await make_movie(title="Movie 1", release_year="1998")
+        movie_2: Movie = await make_movie(title="Movie 2", release_year="1999")
+
+        bookcase: Bookcase = await make_bookcase(name="Test Bookcase")
+        shelf: Shelf = await make_shelf(position_from_top=1, bookcase=bookcase)
+        media: PhysicalMedia = await make_physical_media(movies=[movie_1, movie_2], shelf=shelf)
+
+        assert await sync_to_async(str)(media) == "<PhysicalMedia: Movie 1 (1998), Movie 2 (1999)>"
 
     @pytest.mark.django_db
-    def test_physical_media_can_have_multiple_movies(self):
+    @pytest.mark.asyncio
+    async def test_physical_media_can_have_multiple_movies(
+        self,
+        make_bookcase: BookcaseCreator,
+        make_movie: MovieCreator,
+        make_physical_media: PhysicalMediaCreator,
+        make_shelf: ShelfCreator,
+    ):
         """Test that a PhysicalMedia can have multiple movies."""
-        movie1: Movie = baker.make("Movie", title="Movie 1")
-        movie2: Movie = baker.make("Movie", title="Movie 2")
-        media: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie1, movie2])
+        movie_1: Movie = await make_movie(title="Movie 1", release_year="1998")
+        movie_2: Movie = await make_movie(title="Movie 2", release_year="1999")
 
-        assert media.movies.count() == 2
-        assert media.movies.filter(title="Movie 1").exists()
-        assert media.movies.filter(title="Movie 2").exists()
+        bookcase: Bookcase = await make_bookcase(name="Test Bookcase")
+        shelf: Shelf = await make_shelf(position_from_top=1, bookcase=bookcase)
+        media: PhysicalMedia = await make_physical_media(movies=[movie_1, movie_2], shelf=shelf)
+
+        assert await media.movies.acount() == 2
+        assert await media.movies.filter(title="Movie 1").aexists()
+        assert await media.movies.filter(title="Movie 2").aexists()
 
     @pytest.mark.django_db
     def test_physical_media_can_have_shelf(self):
@@ -382,44 +414,55 @@ class TestCollection:
 
     @pytest.mark.django_db
     @pytest.mark.asyncio
-    async def test_collection_can_have_physical_media(self, make_collection: CollectionCreator):
+    async def test_collection_can_have_multiple_physical_media(
+        self,
+        make_bookcase: BookcaseCreator,
+        make_collection: CollectionCreator,
+        make_movie: MovieCreator,
+        make_physical_media: PhysicalMediaCreator,
+        make_shelf: ShelfCreator,
+    ):
         """Test creating a collection."""
-        movie1: Movie = baker.make("Movie", title="Movie 1")
-        movie2: Movie = baker.make("Movie", title="Movie 2")
-        physical_media1: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie1])
-        physical_media2: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie2])
-        collection: Collection = await make_collection(name="Test Collection")
-        collection.physical_media_set.add(physical_media1, physical_media2)
+        movie_1: Movie = await make_movie("Movie 1", "1998")
+        movie_2: Movie = await make_movie("Movie 2", "1999")
+
+        bookcase: Bookcase = await make_bookcase("Test Bookcase")
+        shelf: Shelf = await make_shelf(position_from_top=1, bookcase=bookcase)
+
+        physical_media1: PhysicalMedia = await make_physical_media(movies=[movie_1], shelf=shelf, position_on_shelf=1)
+        physical_media2: PhysicalMedia = await make_physical_media(movies=[movie_2], shelf=shelf, position_on_shelf=2)
+
+        collection: Collection = await make_collection(name="Test Collection", physical_media=[physical_media1, physical_media2])
 
         assert collection.name == "Test Collection"
-        assert collection.physical_media_set.count() == 2
-        assert collection.movies.count() == 2
-        assert list(collection.movies.values_list("title", flat=True)) == ["Movie 1", "Movie 2"]
+        assert await collection.physical_media_set.acount() == 2
+        assert [m async for m in collection.get_movies()] == [movie_1, movie_2]
 
     @pytest.mark.django_db
     @pytest.mark.asyncio
-    async def test_collection_can_have_physical_media_with_multiple_movies(self, make_collection: CollectionCreator):
+    async def test_collection_can_have_physical_media_with_multiple_movies(
+        self,
+        make_bookcase: BookcaseCreator,
+        make_collection: CollectionCreator,
+        make_movie: MovieCreator,
+        make_physical_media: PhysicalMediaCreator,
+        make_shelf: ShelfCreator,
+    ):
         """Test that a collection can have multiple physical media."""
-        movie1: Movie = baker.make("Movie", title="Movie 1")
-        movie2: Movie = baker.make("Movie", title="Movie 2")
-        movie3: Movie = baker.make("Movie", title="Movie 3")
-        movie4: Movie = baker.make("Movie", title="Movie 4")
-        movie5: Movie = baker.make("Movie", title="Movie 5")
-        physical_media1: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie1, movie2, movie3])
-        physical_media2: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie3, movie4, movie5])
-        collection: Collection = await make_collection(name="Test Collection")
-        collection.physical_media_set.add(physical_media1, physical_media2)
+        movie1: Movie = await make_movie(title="Movie 1", release_year="1998")
+        movie2: Movie = await make_movie(title="Movie 2", release_year="1999")
+        movie3: Movie = await make_movie(title="Movie 3", release_year="2000")
+        movie4: Movie = await make_movie(title="Movie 4", release_year="2001")
+        movie5: Movie = await make_movie(title="Movie 5", release_year="2002")
 
-        assert collection.physical_media_set.count() == 2
-        assert collection.movies.count() == 6
-        assert collection.movies.distinct().count() == 5
-        assert list(collection.movies.distinct().values_list("title", flat=True)) == [
-            "Movie 1",
-            "Movie 2",
-            "Movie 3",
-            "Movie 4",
-            "Movie 5",
-        ]
+        bookcase: Bookcase = await make_bookcase(name="Test Bookcase")
+        shelf: Shelf = await make_shelf(position_from_top=1, bookcase=bookcase)
+        physical_media1: PhysicalMedia = await make_physical_media(shelf=shelf, movies=[movie1, movie2, movie3], position_on_shelf=1)
+        physical_media2: PhysicalMedia = await make_physical_media(shelf=shelf, movies=[movie3, movie4, movie5], position_on_shelf=2)
+        collection: Collection = await make_collection(name="Test Collection", physical_media=[physical_media1, physical_media2])
+
+        assert await collection.physical_media_set.acount() == 2
+        assert await collection.get_movies().acount() == 5
 
 
 class TestTMDbProfile:

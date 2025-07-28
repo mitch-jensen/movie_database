@@ -93,4 +93,8 @@ pythonVersion    = "3.13"
 typeCheckingMode = "strict"
 
 [tool.typos.default.extend-words]
-"acount" = "acount" # don't autocorrect Django models objects.acount to account
+# don't autocorrect Django models objects async method names
+"aadd"    = "aadd"
+"acount"  = "acount"
+"adelete" = "adelete"
+"asave"   = "asave"
