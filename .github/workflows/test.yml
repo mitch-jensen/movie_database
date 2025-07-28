@@ -17,4 +17,12 @@ jobs:
         uses: astral-sh/setup-uv@v6.4.3
 
       - name: Run Tests
-        run: uv run --frozen pytest
+        run: uv run --frozen pytest --junitxml=junit/test-results.xml --cov=movie_database --cov-report=xml --cov-report=html
+
+      - name: Test Report
+        uses: dorny/test-reporter@v2.1.1
+        if: ${{ !cancelled() }}
+        with:
+          name: Python Test
+          path: junit/test-results.xml
+          reporter: java-junit
