@@ -267,7 +267,7 @@ class TestShelfAccommodation:
 class TestMediaCaseDimension:
     """Test class for the MediaCaseDimensions model."""
 
-    @pytest.mark.django_db(transaction=True)
+    @pytest.mark.django_db
     @pytest.mark.asyncio
     async def test_str_method(self, make_media_case_dimensions: MediaCaseDimensionCreator):
         """Test the string representation of the MediaCaseDimensions model."""
@@ -280,7 +280,7 @@ class TestMediaCaseDimension:
         )
         assert str(dimensions) == "100.01W x 101.00H x 102.10D"
 
-    @pytest.mark.django_db(transaction=True)
+    @pytest.mark.django_db
     @pytest.mark.asyncio
     async def test_bluray_us_standard_exists(self):
         """Test if the Blu-ray US Standard dimensions exist."""
@@ -292,7 +292,7 @@ class TestMediaCaseDimension:
             depth=12.00,
         ).aexists()
 
-    @pytest.mark.django_db(transaction=True)
+    @pytest.mark.django_db
     @pytest.mark.asyncio
     async def test_bluray_uk_standard_exists(self):
         """Test if the Blu-ray UK Standard dimensions exist."""
@@ -304,7 +304,7 @@ class TestMediaCaseDimension:
             depth=14.00,
         ).aexists()
 
-    @pytest.mark.django_db(transaction=True)
+    @pytest.mark.django_db
     @pytest.mark.asyncio
     async def test_dvd_standard_exists(self):
         """Test if the DVD Standard dimensions exist."""

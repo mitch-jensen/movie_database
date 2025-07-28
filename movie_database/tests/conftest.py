@@ -3,7 +3,7 @@ from collections.abc import Awaitable, Sequence
 from decimal import Decimal
 from typing import Protocol
 
-import pytest
+import pytest_asyncio
 
 from movie_database.models import Bookcase, Collection, MediaCaseDimensions, MediaFormat, Movie, PhysicalMedia, PhysicalMediaOrientation, Shelf, ShelfDimensions
 
@@ -77,7 +77,7 @@ class ShelfDimensionCreator(Protocol):  # noqa: D101
     ) -> Awaitable[ShelfDimensions]: ...
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def make_bookcase() -> BookcaseCreator:
     """Make a bookcase.
 
@@ -92,7 +92,7 @@ async def make_bookcase() -> BookcaseCreator:
     return _make_bookcase
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def make_collection() -> CollectionCreator:
     """Make a collection.
 
@@ -110,7 +110,7 @@ async def make_collection() -> CollectionCreator:
     return _make_collection
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def make_media_case_dimensions() -> MediaCaseDimensionCreator:
     """Make a MediaCaseDimensions object.
 
@@ -137,7 +137,7 @@ async def make_media_case_dimensions() -> MediaCaseDimensionCreator:
     return _make_media_case_dimensions
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def make_movie() -> MovieCreator:
     """Make a movie.
 
@@ -152,7 +152,7 @@ async def make_movie() -> MovieCreator:
     return _make_movie
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def make_physical_media(make_media_case_dimensions: MediaCaseDimensionCreator, make_collection: CollectionCreator) -> PhysicalMediaCreator:
     """Make a PhysicalMedia instance.
 
@@ -186,7 +186,7 @@ async def make_physical_media(make_media_case_dimensions: MediaCaseDimensionCrea
     return _make_physical_media
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def make_shelf(make_shelf_dimensions: ShelfDimensionCreator) -> ShelfCreator:
     """Make a shelf.
 
@@ -208,7 +208,7 @@ async def make_shelf(make_shelf_dimensions: ShelfDimensionCreator) -> ShelfCreat
     return _make_shelf
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def make_shelf_dimensions() -> ShelfDimensionCreator:
     """Make a ShelfDimensions object.
 
