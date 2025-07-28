@@ -15,7 +15,7 @@ class TestListMovies:
     """Test the list_movies API endpoint."""
 
     @pytest.mark.asyncio
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     async def test_no_movies(self, async_client: AsyncClient):
         """Test listing movies when there are no movies in the database."""
         response: HttpResponse = await async_client.get("/api/v1/movie_database/movies")
@@ -24,7 +24,7 @@ class TestListMovies:
         assert response.json() == {"items": [], "count": 0}
 
     @pytest.mark.asyncio
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     async def test_multiple_movies(self, async_client: AsyncClient, make_movie: MovieCreator):
         """Test listing all movies."""
         movie1: Movie = await make_movie("Movie 1", "2021")

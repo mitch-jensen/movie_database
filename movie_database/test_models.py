@@ -13,7 +13,7 @@ from .models import Bookcase, Collection, MediaCaseDimensions, MediaFormat, Movi
 class TestBookcase:
     """Test class for the Bookcase model."""
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
     async def test_str_method(self, make_bookcase: BookcaseCreator):
         """Test the string representation of the Bookcase model."""
@@ -24,7 +24,7 @@ class TestBookcase:
 class TestShelf:
     """Test class for the Shelf model."""
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
     async def test_str_method(self, make_bookcase: BookcaseCreator, make_shelf: ShelfCreator):
         """Test the string representation of the Shelf model."""
@@ -35,7 +35,7 @@ class TestShelf:
         )
         assert str(shelf) == "Test Bookcase - 3"
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
     async def test_shelf_creation(self, make_bookcase: BookcaseCreator, make_shelf: ShelfCreator):
         """Test creating a shelf."""
@@ -49,7 +49,7 @@ class TestShelf:
         assert shelf.bookcase == bookcase
         assert str(shelf) == f"<Shelf: {bookcase.name} - {shelf.position_from_top}>"
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
     async def test_shelf_creation_with_duplicate_position(
         self,
@@ -66,7 +66,7 @@ class TestShelf:
         with pytest.raises(IntegrityError):
             await Shelf.objects.acreate(position_from_top=1, bookcase=bookcase)
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
     async def test_shelves_with_same_position_in_different_bookcases(
         self,
@@ -85,7 +85,7 @@ class TestShelf:
         assert shelf2.position_from_top == 1
         assert shelf2.bookcase == bookcase2
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
     async def test_shelf_ordering(self, make_bookcase: BookcaseCreator, make_shelf: ShelfCreator):
         """Shelves should be ordered by position_from_top by default."""
@@ -97,7 +97,7 @@ class TestShelf:
         positions: list[int] = [position async for position in bookcase.shelves.values_list("position_from_top", flat=True)]
         assert positions == [1, 2, 3]
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
     async def test_shelf_deletion_on_bookcase_delete(self, make_bookcase: BookcaseCreator, make_shelf: ShelfCreator):
         """Deleting a bookcase should delete its shelves."""
@@ -108,7 +108,7 @@ class TestShelf:
         await bookcase.adelete()
         assert await Shelf.objects.acount() == 0
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.parametrize(
         "position_from_top",
         [-1, -5, -10],
@@ -125,7 +125,7 @@ class TestShelf:
 class TestShelfAccommodation:
     """Test class for accommodating PhysicalMedia on a shelf."""
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.parametrize(
         ("media_height", "shelf_height", "should_fit"),
         [
@@ -156,7 +156,7 @@ class TestShelfAccommodation:
 
         assert shelf.can_fit_media(media) == should_fit
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.parametrize(
         ("media_width", "shelf_width", "should_fit"),
         [
@@ -182,7 +182,7 @@ class TestShelfAccommodation:
 
         assert shelf.can_fit_media(media) == should_fit
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.parametrize(
         ("shelf_height", "expected_used_space"),
         [
@@ -199,7 +199,7 @@ class TestShelfAccommodation:
 
         assert await shelf.used_space() == expected_used_space
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.parametrize(
         ("shelf_width", "expected_used_space"),
         [
@@ -216,7 +216,7 @@ class TestShelfAccommodation:
 
         assert await shelf.used_space() == expected_used_space
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.parametrize(
         ("shelf_height", "media_heights", "expected_used_space"),
         [
@@ -240,7 +240,7 @@ class TestShelfAccommodation:
 
         assert await shelf.used_space() == expected_used_space
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.parametrize(
         ("shelf_width", "media_widths", "expected_used_space"),
         [
@@ -268,7 +268,7 @@ class TestShelfAccommodation:
 class TestMediaCaseDimension:
     """Test class for the MediaCaseDimensions model."""
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
     async def test_str_method(self, make_media_case_dimensions: MediaCaseDimensionCreator):
         """Test the string representation of the MediaCaseDimensions model."""
@@ -281,7 +281,7 @@ class TestMediaCaseDimension:
         )
         assert str(dimensions) == "100.01W x 101.00H x 102.10D"
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
     async def test_bluray_us_standard_exists(self):
         """Test if the Blu-ray US Standard dimensions exist."""
@@ -293,7 +293,7 @@ class TestMediaCaseDimension:
             depth=12.00,
         ).aexists()
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
     async def test_bluray_uk_standard_exists(self):
         """Test if the Blu-ray UK Standard dimensions exist."""
@@ -305,7 +305,7 @@ class TestMediaCaseDimension:
             depth=14.00,
         ).aexists()
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
     async def test_dvd_standard_exists(self):
         """Test if the DVD Standard dimensions exist."""
@@ -321,7 +321,7 @@ class TestMediaCaseDimension:
 class TestPhysicalMedia:
     """Test class for the PhysicalMedia model."""
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
     async def test_str_method_one_movie(
         self,
@@ -337,7 +337,7 @@ class TestPhysicalMedia:
         media: PhysicalMedia = await make_physical_media(movies=[movie], shelf=shelf)
         assert await sync_to_async(str)(media) == "Test Movie (1998)"
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
     async def test_str_method_multiple_movies(
         self,
@@ -356,7 +356,7 @@ class TestPhysicalMedia:
 
         assert await sync_to_async(str)(media) == "Movie 1 (1998), Movie 2 (1999)"
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
     async def test_physical_media_can_have_multiple_movies(
         self,
@@ -377,7 +377,7 @@ class TestPhysicalMedia:
         assert await media.movies.filter(title="Movie 1").aexists()
         assert await media.movies.filter(title="Movie 2").aexists()
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
     async def test_physical_media_can_have_shelf(
         self,
@@ -397,7 +397,7 @@ class TestPhysicalMedia:
         assert media.shelf.bookcase is not None
         assert media.shelf.bookcase == bookcase
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
     async def test_position_on_shelf_is_unique_within_one_shelf(
         self,
@@ -420,7 +420,7 @@ class TestPhysicalMedia:
                 position_on_shelf=1,
             )
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
     async def test_position_on_shelf_can_be_same_in_different_shelves(
         self,
@@ -445,14 +445,14 @@ class TestPhysicalMedia:
 class TestCollection:
     """Test class for the Collection model."""
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
     async def test_str_method(self, make_collection: CollectionCreator):
         """Test the string representation of the Collection model."""
         collection: Collection = await make_collection(name="Test Collection")
         assert str(collection) == "Test Collection"
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
     async def test_collection_can_have_multiple_physical_media(
         self,
@@ -478,7 +478,7 @@ class TestCollection:
         assert await collection.physical_media_set.acount() == 2
         assert [m async for m in collection.get_movies()] == [movie_1, movie_2]
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
     async def test_collection_can_have_physical_media_with_multiple_movies(
         self,
@@ -508,7 +508,7 @@ class TestCollection:
 class TestTMDbProfile:
     """Test class for the TMDbProfile model."""
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
     async def test_str_method(self, make_movie: MovieCreator):
         """Test the string representation of the TMDbProfile model."""
@@ -516,7 +516,7 @@ class TestTMDbProfile:
         tmdb_profile: TMDbProfile = await TMDbProfile.objects.acreate(movie=movie, tmdb_id=12345)
         assert str(tmdb_profile) == "Test Movie"
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
     async def test_cannot_add_duplicate_tmdb_id(self, make_movie: MovieCreator):
         """Test that a TMDbProfile cannot have duplicate tmdb_id."""
@@ -527,7 +527,7 @@ class TestTMDbProfile:
         with pytest.raises(IntegrityError):
             _tmdb_profile_2 = await TMDbProfile.objects.acreate(movie=movie2, tmdb_id=12345)
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
     async def test_tmdb_profile_uniqueness_per_movie(self, make_movie: MovieCreator):
         """Test that a TMDbProfile is unique per movie."""
@@ -537,7 +537,7 @@ class TestTMDbProfile:
         with pytest.raises(IntegrityError):
             _tmdb_profile2 = await TMDbProfile.objects.acreate(movie=movie, tmdb_id=67890)
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
     async def test_tmdb_profile_delete_on_movie_delete(self, make_movie: MovieCreator):
         """Test that deleting a movie deletes its TMDbProfile."""
@@ -554,7 +554,7 @@ class TestTMDbProfile:
 class TestMovie:
     """Test class for the Movie model."""
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
     async def test_str_method(self, make_movie: MovieCreator):
         """Test the string representation of the Movie model."""

@@ -28,14 +28,14 @@ def watched_csv_file(tmp_path: Path) -> Path:
     return file
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_no_failures_on_empty_csv_file(watched_csv_file: Path):
     call_command("import_movies", watched_csv_file)
     assert await Movie.objects.acount() == 0
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_can_import_single_movie(watched_csv_file: Path):
     title = "The Plague of the Zombies"
@@ -56,7 +56,7 @@ async def test_can_import_single_movie(watched_csv_file: Path):
     assert movie.letterboxd_uri == letterboxd_uri
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_duplicate_import_only_imports_once(watched_csv_file: Path):
     """Test that the same movie appearing in the csv file twice only imports once."""
@@ -79,7 +79,7 @@ async def test_duplicate_import_only_imports_once(watched_csv_file: Path):
     assert movie.letterboxd_uri == letterboxd_uri
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_can_import_two_movies(watched_csv_file: Path):
     title_1 = "The Plague of the Zombies"
@@ -107,7 +107,7 @@ async def test_can_import_two_movies(watched_csv_file: Path):
     assert movie_2.letterboxd_uri == letterboxd_uri_2
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_running_same_import_twice_is_idempotent(watched_csv_file: Path):
     title_1 = "The Plague of the Zombies"
@@ -139,7 +139,7 @@ async def test_running_same_import_twice_is_idempotent(watched_csv_file: Path):
     assert movie_2.letterboxd_uri == letterboxd_uri_2
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_import_fails_when_csv_is_malformed(watched_csv_file: Path):
     with Path.open(watched_csv_file, "a", newline="") as f:
@@ -153,7 +153,7 @@ async def test_import_fails_when_csv_is_malformed(watched_csv_file: Path):
     assert await Movie.objects.acount() == 0
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 @pytest.mark.asycio
 async def test_importing_movies_updates_watched_status(watched_csv_file: Path):
     """Test that a movie that already exists in the databased with an unwatched status gets changed to watched upon import."""
