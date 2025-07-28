@@ -90,9 +90,9 @@ class TestShelf:
     async def test_shelf_ordering(self, make_bookcase: BookcaseCreator, make_shelf: ShelfCreator):
         """Shelves should be ordered by position_from_top by default."""
         bookcase: Bookcase = await make_bookcase("Test Bookcase")
-        _shelf_1 = make_shelf(position_from_top=3, bookcase=bookcase)
-        _shelf_2 = make_shelf(position_from_top=1, bookcase=bookcase)
-        _shelf_3 = make_shelf(position_from_top=2, bookcase=bookcase)
+        _shelf_1: Shelf = await make_shelf(position_from_top=3, bookcase=bookcase)
+        _shelf_2: Shelf = await make_shelf(position_from_top=1, bookcase=bookcase)
+        _shelf_3: Shelf = await make_shelf(position_from_top=2, bookcase=bookcase)
 
         positions: list[int] = [position async for position in bookcase.shelves.values_list("position_from_top", flat=True)]
         assert positions == [1, 2, 3]
@@ -144,10 +144,15 @@ class TestShelfAccommodation:
         ],
     )
     @pytest.mark.asyncio
-    async def test_can_fit_media_with_vertical_orientation(self, media_height: Decimal, shelf_height: Decimal, should_fit: bool):
+    async def test_can_fit_media_with_vertical_orientation(
+        self,
+        media_height: Decimal,
+        shelf_height: Decimal,
+        should_fit: bool,
+    ):
         """Test that Shelf.can_fit_media behaves correctly for vertical orientations."""
-        media = baker.make(PhysicalMedia, case_dimensions__height=media_height)
-        shelf = baker.make(Shelf, dimensions__height=shelf_height, orientation=PhysicalMediaOrientation.VERTICAL)
+        media: PhysicalMedia = await sync_to_async(baker.make)(PhysicalMedia, case_dimensions__height=media_height)
+        shelf: Shelf = await sync_to_async(baker.make)(Shelf, dimensions__height=shelf_height, orientation=PhysicalMediaOrientation.VERTICAL)
 
         assert shelf.can_fit_media(media) == should_fit
 
@@ -169,10 +174,11 @@ class TestShelfAccommodation:
             "media wider than shelf by fractional margin",
         ],
     )
-    def test_can_fit_media_with_horizontal_orientation(self, media_width: Decimal, shelf_width: Decimal, should_fit: bool):
+    @pytest.mark.asyncio
+    async def test_can_fit_media_with_horizontal_orientation(self, media_width: Decimal, shelf_width: Decimal, should_fit: bool):
         """Test that Shelf.can_fit_media behaves correctly for horizontal orientations."""
-        media = baker.make(PhysicalMedia, case_dimensions__width=media_width)
-        shelf = baker.make(Shelf, dimensions__width=shelf_width, orientation=PhysicalMediaOrientation.HORIZONTAL)
+        media: PhysicalMedia = await sync_to_async(baker.make)(PhysicalMedia, case_dimensions__width=media_width)
+        shelf: Shelf = await sync_to_async(baker.make)(Shelf, dimensions__width=shelf_width, orientation=PhysicalMediaOrientation.HORIZONTAL)
 
         assert shelf.can_fit_media(media) == should_fit
 
@@ -186,11 +192,12 @@ class TestShelfAccommodation:
             (1000000, 0),
         ],
     )
-    def test_used_space_with_vertical_orientation_and_no_media(self, shelf_height: Decimal, expected_used_space: Decimal):
+    @pytest.mark.asyncio
+    async def test_used_space_with_vertical_orientation_and_no_media(self, shelf_height: Decimal, expected_used_space: Decimal):
         """Test that Shelf.used_space behaves correctly with no physical media present."""
-        shelf = baker.make(Shelf, dimensions__height=shelf_height, orientation=PhysicalMediaOrientation.VERTICAL)
+        shelf: Shelf = await sync_to_async(baker.make)(Shelf, dimensions__height=shelf_height, orientation=PhysicalMediaOrientation.VERTICAL)
 
-        assert shelf.used_space() == expected_used_space
+        assert await shelf.used_space() == expected_used_space
 
     @pytest.mark.django_db
     @pytest.mark.parametrize(
@@ -202,11 +209,12 @@ class TestShelfAccommodation:
             (1000000, 0),
         ],
     )
-    def test_used_space_with_horizontal_orientation_and_no_media(self, shelf_width: Decimal, expected_used_space: Decimal):
+    @pytest.mark.asyncio
+    async def test_used_space_with_horizontal_orientation_and_no_media(self, shelf_width: Decimal, expected_used_space: Decimal):
         """Test that Shelf.used_space behaves correctly with no physical media present."""
-        shelf = baker.make(Shelf, dimensions__width=shelf_width, orientation=PhysicalMediaOrientation.HORIZONTAL)
+        shelf: Shelf = await sync_to_async(baker.make)(Shelf, dimensions__width=shelf_width, orientation=PhysicalMediaOrientation.HORIZONTAL)
 
-        assert shelf.used_space() == expected_used_space
+        assert await shelf.used_space() == expected_used_space
 
     @pytest.mark.django_db
     @pytest.mark.parametrize(
@@ -218,13 +226,19 @@ class TestShelfAccommodation:
             (150, [127.27, 10.78], Decimal("138.05")),
         ],
     )
-    def test_used_space_with_vertical_orientation_and_media_present(self, shelf_height: Decimal, media_heights: list[Decimal], expected_used_space: Decimal):
+    @pytest.mark.asyncio
+    async def test_used_space_with_vertical_orientation_and_media_present(
+        self,
+        shelf_height: Decimal,
+        media_heights: list[Decimal],
+        expected_used_space: Decimal,
+    ):
         """Test that Shelf.used_space is always the sum of physical media widths varying numbers of physical media present."""
-        media = [baker.make(PhysicalMedia, case_dimensions__height=media_width) for media_width in media_heights]
-        shelf = baker.make(Shelf, dimensions__height=shelf_height, orientation=PhysicalMediaOrientation.VERTICAL)
-        shelf.physical_media_set.add(*media)
+        media: list[PhysicalMedia] = [await sync_to_async(baker.make)(PhysicalMedia, case_dimensions__height=media_width) for media_width in media_heights]
+        shelf: Shelf = await sync_to_async(baker.make)(Shelf, dimensions__height=shelf_height, orientation=PhysicalMediaOrientation.VERTICAL)
+        await shelf.physical_media_set.aadd(*media)
 
-        assert shelf.used_space() == expected_used_space
+        assert await shelf.used_space() == expected_used_space
 
     @pytest.mark.django_db
     @pytest.mark.parametrize(
@@ -236,13 +250,19 @@ class TestShelfAccommodation:
             (150, [127.27, 10.78], Decimal("138.05")),
         ],
     )
-    def test_used_space_with_horizontal_orientation_and_media_present(self, shelf_width: Decimal, media_widths: list[Decimal], expected_used_space: Decimal):
+    @pytest.mark.asyncio
+    async def test_used_space_with_horizontal_orientation_and_media_present(
+        self,
+        shelf_width: Decimal,
+        media_widths: list[Decimal],
+        expected_used_space: Decimal,
+    ):
         """Test that Shelf.used_space is always the sum of physical media widths varying numbers of physical media present."""
-        media = [baker.make(PhysicalMedia, case_dimensions__width=media_width) for media_width in media_widths]
-        shelf = baker.make(Shelf, dimensions__width=shelf_width, orientation=PhysicalMediaOrientation.HORIZONTAL)
-        shelf.physical_media_set.add(*media)
+        media: list[PhysicalMedia] = [await sync_to_async(baker.make)(PhysicalMedia, case_dimensions__width=media_width) for media_width in media_widths]
+        shelf: Shelf = await sync_to_async(baker.make)(Shelf, dimensions__width=shelf_width, orientation=PhysicalMediaOrientation.HORIZONTAL)
+        await shelf.physical_media_set.aadd(*media)
 
-        assert shelf.used_space() == expected_used_space
+        assert await shelf.used_space() == expected_used_space
 
 
 class TestMediaCaseDimension:
@@ -358,12 +378,19 @@ class TestPhysicalMedia:
         assert await media.movies.filter(title="Movie 2").aexists()
 
     @pytest.mark.django_db
-    def test_physical_media_can_have_shelf(self):
+    @pytest.mark.asyncio
+    async def test_physical_media_can_have_shelf(
+        self,
+        make_bookcase: BookcaseCreator,
+        make_movie: MovieCreator,
+        make_physical_media: PhysicalMediaCreator,
+        make_shelf: ShelfCreator,
+    ):
         """Test that a PhysicalMedia can have a shelf."""
-        movie: Movie = baker.make("Movie", title="Test Movie")
-        bookcase: Bookcase = baker.make("Bookcase", name="Test Bookcase")
-        shelf: Shelf = baker.make("Shelf", position_from_top=1, bookcase=bookcase)
-        media: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie], shelf=shelf)
+        movie: Movie = await make_movie(title="Test Movie", release_year="1998")
+        bookcase: Bookcase = await make_bookcase(name="Test Bookcase")
+        shelf: Shelf = await make_shelf(position_from_top=1, bookcase=bookcase)
+        media: PhysicalMedia = await make_physical_media(movies=[movie], shelf=shelf)
 
         assert media.shelf is not None
         assert media.shelf == shelf
@@ -371,32 +398,45 @@ class TestPhysicalMedia:
         assert media.shelf.bookcase == bookcase
 
     @pytest.mark.django_db
-    def test_position_on_shelf_is_unique_within_one_shelf(self):
+    @pytest.mark.asyncio
+    async def test_position_on_shelf_is_unique_within_one_shelf(
+        self,
+        make_bookcase: BookcaseCreator,
+        make_movie: MovieCreator,
+        make_physical_media: PhysicalMediaCreator,
+        make_shelf: ShelfCreator,
+    ):
         """Test that the position on a shelf is unique."""
-        movie1: Movie = baker.make("Movie", title="Movie 1")
-        movie2: Movie = baker.make("Movie", title="Movie 2")
-        bookcase: Bookcase = baker.make("Bookcase", name="Test Bookcase")
-        shelf: Shelf = baker.make("Shelf", position_from_top=1, bookcase=bookcase)
-        _media1: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie1], shelf=shelf, position_on_shelf=1)
+        movie1: Movie = await make_movie(title="Movie 1", release_year="1998")
+        movie2: Movie = await make_movie(title="Movie 2", release_year="1999")
+        bookcase: Bookcase = await make_bookcase(name="Test Bookcase")
+        shelf: Shelf = await make_shelf(position_from_top=1, bookcase=bookcase)
+        _media1: PhysicalMedia = await make_physical_media(movies=[movie1], shelf=shelf, position_on_shelf=1)
 
         with pytest.raises(IntegrityError):
-            _media2: PhysicalMedia = baker.make(
-                "PhysicalMedia",
+            _media2: PhysicalMedia = await make_physical_media(
                 movies=[movie2],
                 shelf=shelf,
                 position_on_shelf=1,
             )
 
     @pytest.mark.django_db
-    def test_position_on_shelf_can_be_same_in_different_shelves(self):
+    @pytest.mark.asyncio
+    async def test_position_on_shelf_can_be_same_in_different_shelves(
+        self,
+        make_bookcase: BookcaseCreator,
+        make_movie: MovieCreator,
+        make_physical_media: PhysicalMediaCreator,
+        make_shelf: ShelfCreator,
+    ):
         """Test that the position on a shelf can be the same in different shelves."""
-        movie1: Movie = baker.make("Movie", title="Movie 1")
-        movie2: Movie = baker.make("Movie", title="Movie 2")
-        bookcase: Bookcase = baker.make("Bookcase", name="Test Bookcase")
-        shelf1: Shelf = baker.make("Shelf", position_from_top=1, bookcase=bookcase)
-        shelf2: Shelf = baker.make("Shelf", position_from_top=2, bookcase=bookcase)
-        media1: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie1], shelf=shelf1, position_on_shelf=1)
-        media2: PhysicalMedia = baker.make("PhysicalMedia", movies=[movie2], shelf=shelf2, position_on_shelf=1)
+        movie1: Movie = await make_movie(title="Movie 1", release_year="1998")
+        movie2: Movie = await make_movie(title="Movie 2", release_year="1999")
+        bookcase: Bookcase = await make_bookcase(name="Test Bookcase")
+        shelf1: Shelf = await make_shelf(position_from_top=1, bookcase=bookcase)
+        shelf2: Shelf = await make_shelf(position_from_top=2, bookcase=bookcase)
+        media1: PhysicalMedia = await make_physical_media(movies=[movie1], shelf=shelf1, position_on_shelf=1)
+        media2: PhysicalMedia = await make_physical_media(movies=[movie2], shelf=shelf2, position_on_shelf=1)
 
         assert media1.position_on_shelf == 1
         assert media2.position_on_shelf == 1
@@ -469,42 +509,46 @@ class TestTMDbProfile:
     """Test class for the TMDbProfile model."""
 
     @pytest.mark.django_db
-    def test_str_method(self):
+    @pytest.mark.asyncio
+    async def test_str_method(self, make_movie: MovieCreator):
         """Test the string representation of the TMDbProfile model."""
-        movie: Movie = baker.make("Movie", title="Test Movie")
-        tmdb_profile = TMDbProfile.objects.create(movie=movie, tmdb_id=12345)
+        movie: Movie = await make_movie(title="Test Movie", release_year="1998")
+        tmdb_profile: TMDbProfile = await TMDbProfile.objects.acreate(movie=movie, tmdb_id=12345)
         assert str(tmdb_profile) == "<TMDbProfile: 12345 - Test Movie>"
 
     @pytest.mark.django_db
-    def test_cannot_add_duplicate_tmdb_id(self):
+    @pytest.mark.asyncio
+    async def test_cannot_add_duplicate_tmdb_id(self, make_movie: MovieCreator):
         """Test that a TMDbProfile cannot have duplicate tmdb_id."""
-        movie1: Movie = baker.make("Movie", title="Movie 1")
-        movie2: Movie = baker.make("Movie", title="Movie 2")
-        TMDbProfile.objects.create(movie=movie1, tmdb_id=12345)
+        movie1: Movie = await make_movie(title="Movie 1", release_year="1998")
+        movie2: Movie = await make_movie(title="Movie 2", release_year="1999")
+        _tmdb_profile: TMDbProfile = await TMDbProfile.objects.acreate(movie=movie1, tmdb_id=12345)
 
         with pytest.raises(IntegrityError):
-            TMDbProfile.objects.create(movie=movie2, tmdb_id=12345)
+            _tmdb_profile_2 = await TMDbProfile.objects.acreate(movie=movie2, tmdb_id=12345)
 
     @pytest.mark.django_db
-    def test_tmdb_profile_uniqueness_per_movie(self):
+    @pytest.mark.asyncio
+    async def test_tmdb_profile_uniqueness_per_movie(self, make_movie: MovieCreator):
         """Test that a TMDbProfile is unique per movie."""
-        movie: Movie = baker.make("Movie", title="Movie 1")
-        _tmdb_profile1 = TMDbProfile.objects.create(movie=movie, tmdb_id=12345)
+        movie: Movie = await make_movie(title="Movie 1", release_year="1998")
+        _tmdb_profile1: TMDbProfile = await TMDbProfile.objects.acreate(movie=movie, tmdb_id=12345)
 
         with pytest.raises(IntegrityError):
-            _tmdb_profile2 = TMDbProfile.objects.create(movie=movie, tmdb_id=67890)
+            _tmdb_profile2 = await TMDbProfile.objects.acreate(movie=movie, tmdb_id=67890)
 
     @pytest.mark.django_db
-    def test_tmdb_profile_delete_on_movie_delete(self):
+    @pytest.mark.asyncio
+    async def test_tmdb_profile_delete_on_movie_delete(self, make_movie: MovieCreator):
         """Test that deleting a movie deletes its TMDbProfile."""
-        movie: Movie = baker.make("Movie", title="Test Movie")
-        _tmdb_profile = TMDbProfile.objects.create(movie=movie, tmdb_id=12345)
+        movie: Movie = await make_movie(title="Test Movie", release_year="1998")
+        _tmdb_profile = await TMDbProfile.objects.acreate(movie=movie, tmdb_id=12345)
 
-        assert TMDbProfile.objects.filter(movie=movie).exists()
+        assert await TMDbProfile.objects.filter(movie=movie).aexists()
 
-        movie.delete()
+        await movie.adelete()
 
-        assert not TMDbProfile.objects.exists()
+        assert not await TMDbProfile.objects.aexists()
 
 
 class TestMovie:
