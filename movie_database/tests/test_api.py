@@ -3,12 +3,12 @@ from typing import TYPE_CHECKING
 import pytest
 from django.test.client import AsyncClient
 
-from movie_database.conftest import MovieCreator
+from movie_database.tests.conftest import MovieCreator
 
 if TYPE_CHECKING:
     from django.http import HttpResponse
 
-    from .models import Movie
+    from movie_database.models import Movie
 
 
 class TestListMovies:

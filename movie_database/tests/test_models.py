@@ -5,9 +5,8 @@ from asgiref.sync import sync_to_async
 from django.db import IntegrityError
 from model_bakery import baker
 
-from movie_database.conftest import BookcaseCreator, CollectionCreator, MediaCaseDimensionCreator, MovieCreator, PhysicalMediaCreator, ShelfCreator
-
-from .models import Bookcase, Collection, MediaCaseDimensions, MediaFormat, Movie, PhysicalMedia, PhysicalMediaOrientation, Shelf, TMDbProfile
+from movie_database.models import Bookcase, Collection, MediaCaseDimensions, MediaFormat, Movie, PhysicalMedia, PhysicalMediaOrientation, Shelf, TMDbProfile
+from movie_database.tests.conftest import BookcaseCreator, CollectionCreator, MediaCaseDimensionCreator, MovieCreator, PhysicalMediaCreator, ShelfCreator
 
 
 class TestBookcase:
@@ -47,7 +46,7 @@ class TestShelf:
 
         assert shelf.position_from_top == 1
         assert shelf.bookcase == bookcase
-        assert str(shelf) == f"<Shelf: {bookcase.name} - {shelf.position_from_top}>"
+        assert str(shelf) == f"{bookcase.name} - {shelf.position_from_top}"
 
     @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio

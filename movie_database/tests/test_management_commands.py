@@ -4,10 +4,10 @@ from pathlib import Path
 import pytest
 from asgiref.sync import sync_to_async
 from django.core.management import call_command
-from model_bakery import baker
 from pydantic import ValidationError
 
 from movie_database.models import Movie
+from movie_database.tests.conftest import MovieCreator
 
 
 @pytest.fixture
@@ -154,8 +154,8 @@ async def test_import_fails_when_csv_is_malformed(watched_csv_file: Path):
 
 
 @pytest.mark.django_db(transaction=True)
-@pytest.mark.asycio
-async def test_importing_movies_updates_watched_status(watched_csv_file: Path):
+@pytest.mark.asyncio
+async def test_importing_movies_updates_watched_status(watched_csv_file: Path, make_movie: MovieCreator):
     """Test that a movie that already exists in the databased with an unwatched status gets changed to watched upon import."""
     # TODO @mitch-jensen: have the import be more general and not depend on importing the watched movies only.  # noqa: FIX002, TD003
 
@@ -164,12 +164,12 @@ async def test_importing_movies_updates_watched_status(watched_csv_file: Path):
     letterboxd_uri = "https://boxd.it/1okg"
     watched_date = "2020-03-31"
 
-    movie: Movie = baker.make(Movie, title=title, release_year=release_year, letterboxd_uri=letterboxd_uri, watched=False)
+    movie: Movie = await make_movie(title=title, release_year=release_year, letterboxd_uri=letterboxd_uri, watched=False)
 
     with Path.open(watched_csv_file, "a", newline="") as f:
         writer = csv.writer(f)
         writer.writerow([watched_date, title, release_year, letterboxd_uri])
 
     await sync_to_async(call_command)("import_movies", watched_csv_file)
-    movie.refresh_from_db()
+    await movie.arefresh_from_db()
     assert movie.watched
