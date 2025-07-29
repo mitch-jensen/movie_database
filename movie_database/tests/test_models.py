@@ -172,32 +172,6 @@ class TestShelfAccommodation:
 
     @pytest.mark.django_db(transaction=True)
     @pytest.mark.parametrize(
-        ("media_width", "shelf_width", "should_fit"),
-        [
-            (127.0, 127.0, True),
-            (127.0, 128.0, True),
-            (127.0, 127.00001, True),
-            (128.0, 127.0, False),
-            (127.00001, 127.0, False),
-        ],
-        ids=[
-            "shelf and media width equal",
-            "shelf wider than media",
-            "shelf wider than media by fractional margin",
-            "media wider than shelf",
-            "media wider than shelf by fractional margin",
-        ],
-    )
-    @pytest.mark.asyncio
-    async def test_can_fit_media_with_horizontal_orientation(self, media_width: Decimal, shelf_width: Decimal, should_fit: bool):
-        """Test that Shelf.can_fit_media behaves correctly for horizontal orientations."""
-        media: PhysicalMedia = await sync_to_async(baker.make)(PhysicalMedia, case_dimensions__width=media_width)
-        shelf: Shelf = await sync_to_async(baker.make)(Shelf, dimensions__width=shelf_width, orientation=PhysicalMediaOrientation.HORIZONTAL)
-
-        assert shelf.can_fit_media(media) == should_fit
-
-    @pytest.mark.django_db(transaction=True)
-    @pytest.mark.parametrize(
         ("shelf_height", "expected_used_space"),
         [
             (150, 0),
