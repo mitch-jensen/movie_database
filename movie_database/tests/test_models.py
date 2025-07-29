@@ -1,12 +1,18 @@
 from decimal import Decimal
+from typing import Any
 
 import pytest
 from asgiref.sync import sync_to_async
-from django.db import IntegrityError
+from django.db import IntegrityError, models
 from model_bakery import baker
 
 from movie_database.models import Bookcase, Collection, MediaCaseDimensions, MediaFormat, Movie, PhysicalMedia, PhysicalMediaOrientation, Shelf, TMDbProfile
 from movie_database.tests.conftest import BookcaseCreator, CollectionCreator, MediaCaseDimensionCreator, MovieCreator, PhysicalMediaCreator, ShelfCreator
+
+
+async def abake[T: models.Model](model: type[T], *args: Any, **kwargs: Any) -> T:  # noqa: ANN401
+    """Async wrapper for baker.make with proper typing."""
+    return await sync_to_async(baker.make)(model, *args, **kwargs)
 
 
 class TestBookcase:
@@ -86,8 +92,8 @@ class TestShelf:
 
     @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
-    async def test_shelf_ordering(self, make_bookcase: BookcaseCreator, make_shelf: ShelfCreator):
-        """Shelves should be ordered by position_from_top by default."""
+    async def test_shelf_order_within_bookcase_is_ascending(self, make_bookcase: BookcaseCreator, make_shelf: ShelfCreator):
+        """Shelves should be ordered by position_from_top, no matter the order they're added to the bookcase."""
         bookcase: Bookcase = await make_bookcase("Test Bookcase")
         _shelf_1: Shelf = await make_shelf(position_from_top=3, bookcase=bookcase)
         _shelf_2: Shelf = await make_shelf(position_from_top=1, bookcase=bookcase)
@@ -98,7 +104,7 @@ class TestShelf:
 
     @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
-    async def test_shelf_deletion_on_bookcase_delete(self, make_bookcase: BookcaseCreator, make_shelf: ShelfCreator):
+    async def test_shelf_cascade_deletion_on_bookcase_delete(self, make_bookcase: BookcaseCreator, make_shelf: ShelfCreator):
         """Deleting a bookcase should delete its shelves."""
         bookcase: Bookcase = await make_bookcase("Test Bookcase")
         _shelf_1: Shelf = await make_shelf(position_from_top=1, bookcase=bookcase)
@@ -114,7 +120,7 @@ class TestShelf:
         ids=["negative_one", "negative_five", "negative_ten"],
     )
     @pytest.mark.asyncio
-    async def test_shelf_invalid_position(self, position_from_top: int, make_bookcase: BookcaseCreator):
+    async def test_creating_shelf_with_invalid_position_throws_exception(self, position_from_top: int, make_bookcase: BookcaseCreator):
         """Shelves should not accept zero or negative positions."""
         bookcase: Bookcase = await make_bookcase("Test Bookcase")
         with pytest.raises(IntegrityError):
@@ -126,7 +132,14 @@ class TestShelfAccommodation:
 
     @pytest.mark.django_db(transaction=True)
     @pytest.mark.parametrize(
-        ("media_height", "shelf_height", "should_fit"),
+        ("orientation", "dimension"),
+        [
+            (PhysicalMediaOrientation.VERTICAL, "height"),
+            (PhysicalMediaOrientation.HORIZONTAL, "width"),
+        ],
+    )
+    @pytest.mark.parametrize(
+        ("media_dimension", "shelf_dimension", "should_fit"),
         [
             (127.0, 127.0, True),
             (127.0, 128.0, True),
@@ -135,7 +148,7 @@ class TestShelfAccommodation:
             (127.00001, 127.0, False),
         ],
         ids=[
-            "shelf and media height equal",
+            "shelf and media dimension equal",
             "shelf higher than media",
             "shelf higher than media by fractional margin",
             "media higher than shelf",
@@ -143,15 +156,17 @@ class TestShelfAccommodation:
         ],
     )
     @pytest.mark.asyncio
-    async def test_can_fit_media_with_vertical_orientation(
+    async def test_can_fit_media_on_shelf_with_varying_media_and_shelf_dimensions(
         self,
-        media_height: Decimal,
-        shelf_height: Decimal,
+        orientation: PhysicalMediaOrientation,
+        dimension: str,
+        media_dimension: Decimal,
+        shelf_dimension: Decimal,
         should_fit: bool,
     ):
         """Test that Shelf.can_fit_media behaves correctly for vertical orientations."""
-        media: PhysicalMedia = await sync_to_async(baker.make)(PhysicalMedia, case_dimensions__height=media_height)
-        shelf: Shelf = await sync_to_async(baker.make)(Shelf, dimensions__height=shelf_height, orientation=PhysicalMediaOrientation.VERTICAL)
+        media: PhysicalMedia = await abake(PhysicalMedia, case_dimensions__height=media_dimension)
+        shelf: Shelf = await abake(Shelf, dimensions__height=shelf_dimension, orientation=PhysicalMediaOrientation.VERTICAL)
 
         assert shelf.can_fit_media(media) == should_fit
 
