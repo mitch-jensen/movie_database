@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/mitch-jensen/movie_database/compare/v0.2.0...v0.3.0) (2025-07-29)
+
+
+### Features
+
+* switch to async ([#34](https://github.com/mitch-jensen/movie_database/issues/34)) ([9ffecc2](https://github.com/mitch-jensen/movie_database/commit/9ffecc2f66e95ced3cf12154b02ab5f73847eb95))
+
 ## [0.2.0](https://github.com/mitch-jensen/movie_database/compare/v0.1.0...v0.2.0) (2025-07-17)
 
 
