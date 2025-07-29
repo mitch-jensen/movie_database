@@ -17,18 +17,26 @@ class MediaFormat(models.TextChoices):
     UHD_4K = "4K", "4K UHD"
 
 
-class MediaCaseDimensions(models.Model):
+class Dimension(models.Model):
+    """Abstract model representing anything with a width, height and depth."""
+
+    width = models.DecimalField(max_digits=5, decimal_places=2)
+    height = models.DecimalField(max_digits=5, decimal_places=2)
+    depth = models.DecimalField(max_digits=5, decimal_places=2)
+
+    class Meta:  # noqa: D106
+        abstract = True
+
+
+class MediaCaseDimensions(Dimension):
     """Represents the dimensions of a media case."""
 
     id: int
     media_format = models.CharField(max_length=3, choices=MediaFormat.choices)
     description = models.CharField(max_length=255, blank=False)
-    width = models.DecimalField(max_digits=5, decimal_places=2)
-    height = models.DecimalField(max_digits=5, decimal_places=2)
-    depth = models.DecimalField(max_digits=5, decimal_places=2)
     physical_media_set: "RelatedManager['PhysicalMedia']"
 
-    class Meta:  # noqa: D106
+    class Meta:  # pyright: ignore[reportIncompatibleVariableOverride] # noqa: D106
         verbose_name = "Media Case Dimensions"
         verbose_name_plural = "Media Case Dimensions"
 
@@ -39,16 +47,13 @@ class MediaCaseDimensions(models.Model):
         return f"{self.width:.2f}W x {self.height:.2f}H x {self.depth:.2f}D"
 
 
-class ShelfDimensions(models.Model):
+class ShelfDimensions(Dimension):
     """Represents the dimensions of a shelf."""
 
     id: int
-    width = models.DecimalField(max_digits=5, decimal_places=2)
-    height = models.DecimalField(max_digits=5, decimal_places=2)
-    depth = models.DecimalField(max_digits=5, decimal_places=2)
     shelves: "RelatedManager['Shelf']"
 
-    class Meta:  # noqa: D106
+    class Meta:  # pyright: ignore[reportIncompatibleVariableOverride] # noqa: D106
         verbose_name = "Shelf Dimensions"
         verbose_name_plural = "Shelf Dimensions"
 
@@ -100,10 +105,10 @@ class Shelf(models.Model):
         )
 
     def __repr__(self) -> str:  # noqa: D105
-        return f"<Shelf: {self.bookcase.name} - {self.position_from_top}>"
+        return f"<Shelf: {self.bookcase.name} - Shelf {self.position_from_top}>"
 
     def __str__(self) -> str:  # noqa: D105
-        return f"{self.bookcase.name} - {self.position_from_top}"
+        return f"{self.bookcase.name} - Shelf {self.position_from_top}"
 
     def can_fit_media(self, media: "PhysicalMedia") -> bool:
         """Check if a single PhysicalMedia can physically fit on this shelf."""
