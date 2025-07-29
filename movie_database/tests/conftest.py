@@ -40,7 +40,7 @@ class MovieCreator(Protocol):  # noqa: D101
     def __call__(  # noqa: D102
         self,
         title: str,
-        release_year: str,
+        release_year: str = ...,
         letterboxd_uri: str = ...,
         watched: bool = ...,  # noqa: FBT001
     ) -> Awaitable[Movie]: ...
@@ -146,8 +146,9 @@ async def make_movie() -> MovieCreator:
 
     """
 
-    async def _make_movie(title: str, release_year: str, letterboxd_uri: str = "", watched: bool = False) -> Movie:  # noqa: FBT001, FBT002
-        return await Movie.objects.acreate(title=title, release_year=release_year, letterboxd_uri=letterboxd_uri, watched=watched)
+    async def _make_movie(title: str, release_year: str | None = None, letterboxd_uri: str = "", watched: bool = False) -> Movie:  # noqa: FBT001, FBT002
+        _release_year: str = release_year or str(random.randint(1888, 2100))  # noqa: S311
+        return await Movie.objects.acreate(title=title, release_year=_release_year, letterboxd_uri=letterboxd_uri, watched=watched)
 
     return _make_movie
 

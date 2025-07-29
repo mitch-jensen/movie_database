@@ -330,11 +330,11 @@ class TestPhysicalMedia:
         make_shelf: ShelfCreator,
     ):
         """Test the string representation of the PhysicalMedia model."""
-        movie: Movie = await make_movie(title="Test Movie", release_year="1998")
+        movie: Movie = await make_movie(title="Test Movie", release_year="1967")
         bookcase: Bookcase = await make_bookcase(name="Test Bookcase")
         shelf: Shelf = await make_shelf(position_from_top=1, bookcase=bookcase)
         media: PhysicalMedia = await make_physical_media(movies=[movie], shelf=shelf)
-        assert await sync_to_async(str)(media) == "Test Movie (1998)"
+        assert await sync_to_async(str)(media) == "Test Movie (1967)"
 
     @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
@@ -346,14 +346,14 @@ class TestPhysicalMedia:
         make_shelf: ShelfCreator,
     ):
         """Test the string representation of the PhysicalMedia model with multiple movies."""
-        movie_1: Movie = await make_movie(title="Movie 1", release_year="1998")
-        movie_2: Movie = await make_movie(title="Movie 2", release_year="1999")
+        movie_1: Movie = await make_movie(title="Movie 1", release_year="1943")
+        movie_2: Movie = await make_movie(title="Movie 2", release_year="1983")
 
         bookcase: Bookcase = await make_bookcase(name="Test Bookcase")
         shelf: Shelf = await make_shelf(position_from_top=1, bookcase=bookcase)
         media: PhysicalMedia = await make_physical_media(movies=[movie_1, movie_2], shelf=shelf)
 
-        assert await sync_to_async(str)(media) == "Movie 1 (1998), Movie 2 (1999)"
+        assert await sync_to_async(str)(media) == "Movie 1 (1943), Movie 2 (1983)"
 
     @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
@@ -365,8 +365,8 @@ class TestPhysicalMedia:
         make_shelf: ShelfCreator,
     ):
         """Test that a PhysicalMedia can have multiple movies."""
-        movie_1: Movie = await make_movie(title="Movie 1", release_year="1998")
-        movie_2: Movie = await make_movie(title="Movie 2", release_year="1999")
+        movie_1: Movie = await make_movie(title="Movie 1")
+        movie_2: Movie = await make_movie(title="Movie 2")
 
         bookcase: Bookcase = await make_bookcase(name="Test Bookcase")
         shelf: Shelf = await make_shelf(position_from_top=1, bookcase=bookcase)
@@ -386,7 +386,7 @@ class TestPhysicalMedia:
         make_shelf: ShelfCreator,
     ):
         """Test that a PhysicalMedia can have a shelf."""
-        movie: Movie = await make_movie(title="Test Movie", release_year="1998")
+        movie: Movie = await make_movie(title="Test Movie")
         bookcase: Bookcase = await make_bookcase(name="Test Bookcase")
         shelf: Shelf = await make_shelf(position_from_top=1, bookcase=bookcase)
         media: PhysicalMedia = await make_physical_media(movies=[movie], shelf=shelf)
@@ -406,8 +406,8 @@ class TestPhysicalMedia:
         make_shelf: ShelfCreator,
     ):
         """Test that the position on a shelf is unique."""
-        movie1: Movie = await make_movie(title="Movie 1", release_year="1998")
-        movie2: Movie = await make_movie(title="Movie 2", release_year="1999")
+        movie1: Movie = await make_movie(title="Movie 1")
+        movie2: Movie = await make_movie(title="Movie 2")
         bookcase: Bookcase = await make_bookcase(name="Test Bookcase")
         shelf: Shelf = await make_shelf(position_from_top=1, bookcase=bookcase)
         _media1: PhysicalMedia = await make_physical_media(movies=[movie1], shelf=shelf, position_on_shelf=1)
@@ -429,8 +429,8 @@ class TestPhysicalMedia:
         make_shelf: ShelfCreator,
     ):
         """Test that the position on a shelf can be the same in different shelves."""
-        movie1: Movie = await make_movie(title="Movie 1", release_year="1998")
-        movie2: Movie = await make_movie(title="Movie 2", release_year="1999")
+        movie1: Movie = await make_movie(title="Movie 1")
+        movie2: Movie = await make_movie(title="Movie 2")
         bookcase: Bookcase = await make_bookcase(name="Test Bookcase")
         shelf1: Shelf = await make_shelf(position_from_top=1, bookcase=bookcase)
         shelf2: Shelf = await make_shelf(position_from_top=2, bookcase=bookcase)
@@ -462,8 +462,8 @@ class TestCollection:
         make_shelf: ShelfCreator,
     ):
         """Test creating a collection."""
-        movie_1: Movie = await make_movie("Movie 1", "1998")
-        movie_2: Movie = await make_movie("Movie 2", "1999")
+        movie_1: Movie = await make_movie("Movie 1")
+        movie_2: Movie = await make_movie("Movie 2")
 
         bookcase: Bookcase = await make_bookcase("Test Bookcase")
         shelf: Shelf = await make_shelf(position_from_top=1, bookcase=bookcase)
@@ -488,11 +488,11 @@ class TestCollection:
         make_shelf: ShelfCreator,
     ):
         """Test that a collection can have multiple physical media."""
-        movie1: Movie = await make_movie(title="Movie 1", release_year="1998")
-        movie2: Movie = await make_movie(title="Movie 2", release_year="1999")
-        movie3: Movie = await make_movie(title="Movie 3", release_year="2000")
-        movie4: Movie = await make_movie(title="Movie 4", release_year="2001")
-        movie5: Movie = await make_movie(title="Movie 5", release_year="2002")
+        movie1: Movie = await make_movie(title="Movie 1")
+        movie2: Movie = await make_movie(title="Movie 2")
+        movie3: Movie = await make_movie(title="Movie 3")
+        movie4: Movie = await make_movie(title="Movie 4")
+        movie5: Movie = await make_movie(title="Movie 5")
 
         bookcase: Bookcase = await make_bookcase(name="Test Bookcase")
         shelf: Shelf = await make_shelf(position_from_top=1, bookcase=bookcase)
@@ -511,7 +511,7 @@ class TestTMDbProfile:
     @pytest.mark.asyncio
     async def test_str_method(self, make_movie: MovieCreator):
         """Test the string representation of the TMDbProfile model."""
-        movie: Movie = await make_movie(title="Test Movie", release_year="1998")
+        movie: Movie = await make_movie(title="Test Movie")
         tmdb_profile: TMDbProfile = await TMDbProfile.objects.acreate(movie=movie, tmdb_id=12345)
         assert str(tmdb_profile) == "Test Movie"
 
@@ -519,8 +519,8 @@ class TestTMDbProfile:
     @pytest.mark.asyncio
     async def test_cannot_add_duplicate_tmdb_id(self, make_movie: MovieCreator):
         """Test that a TMDbProfile cannot have duplicate tmdb_id."""
-        movie1: Movie = await make_movie(title="Movie 1", release_year="1998")
-        movie2: Movie = await make_movie(title="Movie 2", release_year="1999")
+        movie1: Movie = await make_movie(title="Movie 1")
+        movie2: Movie = await make_movie(title="Movie 2")
         _tmdb_profile: TMDbProfile = await TMDbProfile.objects.acreate(movie=movie1, tmdb_id=12345)
 
         with pytest.raises(IntegrityError):
@@ -530,7 +530,7 @@ class TestTMDbProfile:
     @pytest.mark.asyncio
     async def test_tmdb_profile_uniqueness_per_movie(self, make_movie: MovieCreator):
         """Test that a TMDbProfile is unique per movie."""
-        movie: Movie = await make_movie(title="Movie 1", release_year="1998")
+        movie: Movie = await make_movie(title="Movie 1")
         _tmdb_profile1: TMDbProfile = await TMDbProfile.objects.acreate(movie=movie, tmdb_id=12345)
 
         with pytest.raises(IntegrityError):
@@ -540,7 +540,7 @@ class TestTMDbProfile:
     @pytest.mark.asyncio
     async def test_tmdb_profile_delete_on_movie_delete(self, make_movie: MovieCreator):
         """Test that deleting a movie deletes its TMDbProfile."""
-        movie: Movie = await make_movie(title="Test Movie", release_year="1998")
+        movie: Movie = await make_movie(title="Test Movie")
         _tmdb_profile = await TMDbProfile.objects.acreate(movie=movie, tmdb_id=12345)
 
         assert await TMDbProfile.objects.filter(movie=movie).aexists()
@@ -557,5 +557,5 @@ class TestMovie:
     @pytest.mark.asyncio
     async def test_str_method(self, make_movie: MovieCreator):
         """Test the string representation of the Movie model."""
-        movie: Movie = await make_movie(title="Test Movie", release_year="1998")
-        assert str(movie) == "Test Movie (1998)"
+        movie: Movie = await make_movie(title="Test Movie", release_year="1977")
+        assert str(movie) == "Test Movie (1977)"
