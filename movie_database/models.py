@@ -100,10 +100,10 @@ class Shelf(models.Model):
         )
 
     def __repr__(self) -> str:  # noqa: D105
-        return f"<Shelf: {self.bookcase.name} - {self.position_from_top}>"
+        return f"<Shelf: {self.bookcase.name} - Shelf {self.position_from_top}>"
 
     def __str__(self) -> str:  # noqa: D105
-        return f"{self.bookcase.name} - {self.position_from_top}"
+        return f"{self.bookcase.name} - Shelf {self.position_from_top}"
 
     def can_fit_media(self, media: "PhysicalMedia") -> bool:
         """Check if a single PhysicalMedia can physically fit on this shelf."""
