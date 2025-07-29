@@ -12,4 +12,4 @@ router = Router()
 @paginate
 async def list_movies(request: HttpRequest) -> list[MovieSchema]:  # noqa: ARG001
     """List all movies in the database."""
-    return [movie async for movie in Movie.objects.all()]
+    return [MovieSchema.from_orm(movie) async for movie in Movie.objects.all()]
