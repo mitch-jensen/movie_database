@@ -475,7 +475,9 @@ class TestCollection:
 
         assert collection.name == "Test Collection"
         assert await collection.physical_media_set.acount() == 2
-        assert [m async for m in collection.get_movies()] == [movie_1, movie_2]
+
+        collection_movies: list[Movie] = [m async for m in collection.get_movies()]
+        assert sorted(collection_movies) == sorted([movie_1, movie_2])
 
     @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio

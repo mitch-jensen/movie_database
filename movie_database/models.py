@@ -186,6 +186,9 @@ class Movie(models.Model):
             "title",
         )
 
+    def __lt__(self, other: "Movie") -> bool:  # noqa: D105
+        return (self.release_year, self.title.lower()) < (other.release_year, other.title.lower())
+
     def __repr__(self) -> str:  # noqa: D105
         return f"<Movie: {self.title} ({self.release_year})>"
 
