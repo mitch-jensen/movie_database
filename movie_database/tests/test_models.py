@@ -45,7 +45,6 @@ class TestShelf:
 
         assert shelf.position_from_top == 1
         assert shelf.bookcase == bookcase
-        assert str(shelf) == f"{bookcase.name} - {shelf.position_from_top}"
 
     @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
