@@ -347,6 +347,9 @@ wheels = [
 pytest = [
     { name = "pytest" },
 ]
+structlog = [
+    { name = "structlog" },
+]
 
 [[package]]
 name = "markdown-it-py"
@@ -432,7 +435,7 @@ dev = [
     { name = "beartype" },
     { name = "commitizen" },
     { name = "deptry" },
-    { name = "logot", extra = ["pytest"] },
+    { name = "logot", extra = ["pytest", "structlog"] },
     { name = "model-bakery" },
     { name = "pre-commit" },
     { name = "pytest" },
@@ -462,7 +465,7 @@ dev = [
     { name = "beartype", specifier = ">=0.20.2,<0.21" },
     { name = "commitizen", specifier = ">=4.8.3,<5" },
     { name = "deptry", specifier = ">=0.23.0,<1" },
-    { name = "logot", extras = ["pytest"], specifier = ">=1.5.1,<2" },
+    { name = "logot", extras = ["pytest", "structlog"], specifier = ">=1.5.1,<2" },
     { name = "model-bakery", specifier = ">=1.20.4,<2" },
     { name = "pre-commit", specifier = ">=4.2.0,<5" },
     { name = "pytest", specifier = ">=8.4.1,<9" },

@@ -24,7 +24,7 @@ dev = [
   "beartype>=0.20.2,<0.21",
   "commitizen>=4.8.3,<5",
   "deptry>=0.23.0,<1",
-  "logot[pytest]>=1.5.1,<2",
+  "logot[pytest,structlog]>=1.5.1,<2",
   "model-bakery>=1.20.4,<2",
   "pre-commit>=4.2.0,<5",
   "pytest-asyncio>=1.1.0,<2",
@@ -91,6 +91,7 @@ skip-magic-trailing-comma  = false
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "core.settings_testing"
 asyncio_mode           = "auto"
+logot_capturer         = "logot.structlog.StructlogCapturer"
 
 [tool.pyright]
 pythonPlatform   = "Linux"

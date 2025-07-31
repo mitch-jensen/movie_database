@@ -5,10 +5,13 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+import structlog
 from django.core.management.base import BaseCommand
 from pydantic import BaseModel, ConfigDict, Field
 
 from movie_database.models import Movie
+
+logger = structlog.get_logger()
 
 
 class ImportMovie(BaseModel):
@@ -51,6 +54,7 @@ class Command(BaseCommand):
         movies = self.get_movies_from_csv(csv_file)
 
         if not movies:
+            logger.warning("CSV file was empty.")
             self.stdout.write(self.style.WARNING("No movies found in file."))
             return
 
