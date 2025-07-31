@@ -8,7 +8,7 @@ EXPOSE 8000
 RUN addgroup -g 1000 python \
     && adduser -u 1000 -G python -D python
 
-FROM python:3.13-alpine AS requirements
+FROM python:3.13-alpine AS requirements-exporter
 
 WORKDIR /app
 
@@ -23,7 +23,7 @@ FROM base AS production
 ENV DJANGO_SETTINGS_MODULE=core.settings_production
 
 RUN --mount=type=cache,target=/root/.cache/pip \
-    --mount=type=bind,from=requirements,source=/app/requirements.txt,target=requirements.txt \
+    --mount=type=bind,from=requirements-exporter,source=/app/requirements.txt,target=requirements.txt \
     python -m pip install -r requirements.txt
 
 USER python
