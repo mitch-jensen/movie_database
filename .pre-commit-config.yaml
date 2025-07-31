@@ -66,10 +66,3 @@ repos:
     hooks:
       - id: uv-lock
       - id: uv-sync
-      - id: uv-export
-        args:
-          - --frozen
-          - --output-file=requirements.txt
-          - --no-editable
-          - --no-group
-          - dev
