@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 from asgiref.sync import sync_to_async
 from django.core.management import call_command
+from logot import Logot, logged
 from pydantic import ValidationError
 
 from movie_database.models import Movie
@@ -30,9 +31,10 @@ def watched_csv_file(tmp_path: Path) -> Path:
 
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
-async def test_no_failures_on_empty_csv_file(watched_csv_file: Path):
+async def test_no_failures_on_empty_csv_file(watched_csv_file: Path, logot: Logot):
     call_command("import_movies", watched_csv_file)
     assert await Movie.objects.acount() == 0
+    logot.assert_logged(logged.warning("CSV file was empty."))
 
 
 @pytest.mark.django_db(transaction=True)
