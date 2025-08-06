@@ -37,15 +37,15 @@ async def list_media_case_dimensions(request: HttpRequest) -> list[MediaCaseDime
 
 
 @router.get("/media_case_dimensions/{media_case_dimensions_id}", response=MediaCaseDimensionSchemaOut, tags=["media_case_dimensions"])
-async def get_media_case_dimensions(request: HttpRequest, media_case_dimensions_id: int) -> MediaCaseDimensionSchemaOut:  # noqa: ARG001, D103
-    media_case_dimensions: MediaCaseDimensions = await aget_object_or_404(MediaCaseDimensions, id=media_case_dimensions_id)
-    return media_case_dimensions
+async def get_media_case_dimensions(request: HttpRequest, media_case_dimensions_id: int) -> MediaCaseDimensions:  # noqa: ARG001, D103
+    media_case_dimensions: MediaCaseDimensions = await aget_object_or_404(MediaCaseDimensions, id=media_case_dimensions_id)  # pyright: ignore[reportUnknownVariableType]
+    return media_case_dimensions  # pyright: ignore[reportUnknownVariableType]
 
 
 @router.delete("/media_case_dimensions/{media_case_dimensions_id}", tags=["media_case_dimensions"])
 async def delete_media_case_dimensions(request: HttpRequest, media_case_dimensions_id: int) -> DefaultDeleteSuccessResponse:  # noqa: ARG001, D103
-    media_case_dimensions: MediaCaseDimensions = await aget_object_or_404(MediaCaseDimensions, id=media_case_dimensions_id)
-    await media_case_dimensions.adelete()
+    media_case_dimensions: MediaCaseDimensions = await aget_object_or_404(MediaCaseDimensions, id=media_case_dimensions_id)  # pyright: ignore[reportUnknownVariableType]
+    await media_case_dimensions.adelete()  # pyright: ignore[reportUnknownMemberType]
     return {"success": True}
 
 
@@ -64,6 +64,6 @@ async def list_movies(request: HttpRequest, filters: Annotated[MovieFilterSchema
 
 
 @router.get("/movies/{movie_id}", response=MovieSchemaOut, tags=["movies"])
-async def get_movie(request: HttpRequest, movie_id: int) -> MovieSchemaOut:  # noqa: ARG001, D103
-    movie: Movie = await aget_object_or_404(Movie, id=movie_id)
-    return movie
+async def get_movie(request: HttpRequest, movie_id: int) -> Movie:  # noqa: ARG001, D103
+    movie: Movie = await aget_object_or_404(Movie, id=movie_id)  # pyright: ignore[reportUnknownVariableType]
+    return movie  # pyright: ignore[reportUnknownVariableType]
