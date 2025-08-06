@@ -5,15 +5,21 @@ from django.shortcuts import aget_object_or_404
 from ninja import Query, Router
 from ninja.pagination import paginate
 
-from .models import MediaCaseDimensions, Movie, ShelfDimensions
+from .models import Bookcase, Collection, MediaCaseDimensions, Movie, ShelfDimensions
 from .schema import (
+    BookcaseSchemaIn,
+    BookcaseSchemaOut,
+    CollectionSchemaIn,
+    CollectionSchemaOut,
     MediaCaseDimensionSchemaIn,
     MediaCaseDimensionSchemaOut,
     MovieFilterSchema,
     MovieSchemaIn,
     MovieSchemaOut,
+    PhysicalMediaSchema,
     ShelfDimensionSchemaIn,
     ShelfDimensionSchemaOut,
+    ShelfSchemaOut,
 )
 
 router = Router()
@@ -29,6 +35,72 @@ class DefaultDeleteSuccessResponse(TypedDict):
     """The default success response body on a DELETE request."""
 
     success: Literal[True]
+
+
+@router.post("/bookcases", tags=["bookcase"])
+async def create_bookcase(request: HttpRequest, payload: BookcaseSchemaIn) -> DefaultPostSuccessResponse:  # noqa: ARG001, D103
+    bookcase = await Bookcase.objects.acreate(**payload.dict())
+    return {"id": bookcase.id}
+
+
+@router.get("/bookcases", response=list[BookcaseSchemaOut], tags=["bookcase"])
+@paginate
+async def list_bookcases(request: HttpRequest) -> list[BookcaseSchemaOut]:  # noqa: ARG001, D103
+    bookcase = Bookcase.objects.all()
+    return [BookcaseSchemaOut.from_orm(m) async for m in bookcase]
+
+
+@router.get("/bookcases/{bookcase_id}", response=BookcaseSchemaOut, tags=["bookcase"])
+async def get_bookcase(request: HttpRequest, bookcase_id: int) -> Bookcase:  # noqa: ARG001, D103
+    bookcase: Bookcase = await aget_object_or_404(Bookcase, id=bookcase_id)  # pyright: ignore[reportUnknownVariableType]
+    return bookcase  # pyright: ignore[reportUnknownVariableType]
+
+
+@router.get("/bookcases/{bookcase_id}/shelves", response=list[ShelfSchemaOut], tags=["bookcase", "shelf"])
+@paginate
+async def get_bookcase_shelves(request: HttpRequest, bookcase_id: int) -> list[ShelfSchemaOut]:  # noqa: ARG001, D103
+    bookcase: Bookcase = await aget_object_or_404(Bookcase, id=bookcase_id)  # pyright: ignore[reportUnknownVariableType]
+    return [ShelfSchemaOut.from_orm(shelf) async for shelf in bookcase.shelves.all()]
+
+
+@router.delete("/bookcases/{bookcase_id}", tags=["bookcase"])
+async def delete_bookcase(request: HttpRequest, bookcase_id: int) -> DefaultDeleteSuccessResponse:  # noqa: ARG001, D103
+    bookcase: Bookcase = await aget_object_or_404(Bookcase, id=bookcase_id)  # pyright: ignore[reportUnknownVariableType]
+    await bookcase.adelete()  # pyright: ignore[reportUnknownMemberType]
+    return {"success": True}
+
+
+@router.post("/collections", tags=["collection"])
+async def create_collection(request: HttpRequest, payload: CollectionSchemaIn) -> DefaultPostSuccessResponse:  # noqa: ARG001, D103
+    collection = await Collection.objects.acreate(**payload.dict())
+    return {"id": collection.id}
+
+
+@router.get("/collections", response=list[CollectionSchemaOut], tags=["collection"])
+@paginate
+async def list_collections(request: HttpRequest) -> list[CollectionSchemaOut]:  # noqa: ARG001, D103
+    collection = Collection.objects.all()
+    return [CollectionSchemaOut.from_orm(m) async for m in collection]
+
+
+@router.get("/collections/{collection_id}", response=CollectionSchemaOut, tags=["collection"])
+async def get_collection(request: HttpRequest, collection_id: int) -> Collection:  # noqa: ARG001, D103
+    collection: Collection = await aget_object_or_404(Collection, id=collection_id)  # pyright: ignore[reportUnknownVariableType]
+    return collection  # pyright: ignore[reportUnknownVariableType]
+
+
+@router.get("/collections/{collection_id}/media", response=list[PhysicalMediaSchema], tags=["collection", "physical_media"])
+@paginate
+async def get_collection_media(request: HttpRequest, collection_id: int) -> list[ShelfSchemaOut]:  # noqa: ARG001, D103
+    collection: Collection = await aget_object_or_404(Collection, id=collection_id)  # pyright: ignore[reportUnknownVariableType]
+    return [PhysicalMediaSchema.from_orm(shelf) async for shelf in collection.physical_media_set.all()]
+
+
+@router.delete("/collections/{collection_id}", tags=["collection"])
+async def delete_collection(request: HttpRequest, collection_id: int) -> DefaultDeleteSuccessResponse:  # noqa: ARG001, D103
+    collection: Collection = await aget_object_or_404(Collection, id=collection_id)  # pyright: ignore[reportUnknownVariableType]
+    await collection.adelete()  # pyright: ignore[reportUnknownMemberType]
+    return {"success": True}
 
 
 @router.post("/media_case_dimensions", tags=["media_case_dimensions"])
@@ -101,3 +173,9 @@ async def list_movies(request: HttpRequest, filters: Annotated[MovieFilterSchema
 async def get_movie(request: HttpRequest, movie_id: int) -> Movie:  # noqa: ARG001, D103
     movie: Movie = await aget_object_or_404(Movie, id=movie_id)  # pyright: ignore[reportUnknownVariableType]
     return movie  # pyright: ignore[reportUnknownVariableType]
+
+
+@router.get("/movies/{movie_id}/physical_media", response=list[PhysicalMediaSchema], tags=["movies", "physical_media"])
+async def get_movie_physical_media(request: HttpRequest, movie_id: int) -> list[PhysicalMediaSchema]:  # noqa: ARG001, D103
+    movie: Movie = await aget_object_or_404(Movie, id=movie_id)  # pyright: ignore[reportUnknownVariableType]
+    return [PhysicalMediaSchema.from_orm(medium) async for medium in movie.physical_media_set.all()]

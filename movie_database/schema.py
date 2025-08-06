@@ -2,9 +2,39 @@ from typing import Annotated
 
 from ninja import Field, FilterSchema, ModelSchema
 
-from .models import MediaCaseDimensions, Movie, PhysicalMedia
+from .models import Bookcase, Collection, MediaCaseDimensions, Movie, PhysicalMedia, Shelf
 
 IContainsField = Annotated[str | None, Field(None, q="__icontains")]  # pyright: ignore[reportCallIssue]
+
+
+class BookcaseSchemaOut(ModelSchema):  # noqa: D101
+    class Meta:  # noqa: D106
+        model = Bookcase
+        fields = ("id", "name", "description", "location")
+
+
+class BookcaseSchemaIn(ModelSchema):  # noqa: D101
+    class Meta:  # noqa: D106
+        model = Bookcase
+        fields = ("name", "description", "location")
+
+
+class CollectionSchemaOut(ModelSchema):  # noqa: D101
+    class Meta:  # noqa: D106
+        model = Collection
+        fields = ("id", "name")
+
+
+class CollectionSchemaIn(ModelSchema):  # noqa: D101
+    class Meta:  # noqa: D106
+        model = Collection
+        fields = ("name",)
+
+
+class ShelfSchemaOut(ModelSchema):  # noqa: D101
+    class Meta:  # noqa: D106
+        model = Shelf
+        fields = ("id", "position_from_top", "orientation")
 
 
 class MediaCaseDimensionSchemaOut(ModelSchema):  # noqa: D101
@@ -52,10 +82,6 @@ class PhysicalMediaSchema(ModelSchema):  # noqa: D101
     class Meta:  # noqa: D106
         model = PhysicalMedia
         fields = ("position_on_shelf", "notes")
-
-
-class MovieSchemaWithMedia(MovieSchemaOut):  # noqa: D101
-    physical_media_set: list[PhysicalMediaSchema]
 
 
 class MovieFilterSchema(FilterSchema):  # noqa: D101
