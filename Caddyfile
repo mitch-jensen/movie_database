@@ -1,8 +1,10 @@
 :80
 
+encode
+
 handle_path /static/* {
-    root * /app/static
-    file_server
+	root * /app/static
+	file_server
 }
 
 reverse_proxy django:8000
