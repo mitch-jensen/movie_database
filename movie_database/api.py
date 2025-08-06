@@ -4,7 +4,7 @@ from django.http import HttpRequest
 from django.shortcuts import aget_object_or_404
 from ninja import Query, Router
 
-from .models import Bookcase, Collection, MediaCaseDimensions, Movie, ShelfDimensions
+from .models import Bookcase, Collection, MediaCaseDimensions, Movie, PhysicalMedia, ShelfDimensions
 from .schema import (
     BookcaseSchemaIn,
     BookcaseSchemaOut,
@@ -50,20 +50,19 @@ async def list_bookcases(request: HttpRequest) -> list[BookcaseSchemaOut]:  # no
 
 @router.get("/bookcases/{bookcase_id}", response=BookcaseSchemaOut, tags=["bookcase"])
 async def get_bookcase(request: HttpRequest, bookcase_id: int) -> Bookcase:  # noqa: ARG001, D103
-    bookcase: Bookcase = await aget_object_or_404(Bookcase, id=bookcase_id)  # pyright: ignore[reportUnknownVariableType]
-    return bookcase  # pyright: ignore[reportUnknownVariableType]
+    return await aget_object_or_404(Bookcase, id=bookcase_id)
 
 
 @router.get("/bookcases/{bookcase_id}/shelves", response=list[ShelfSchemaOut], tags=["bookcase", "shelf"])
 async def get_bookcase_shelves(request: HttpRequest, bookcase_id: int) -> list[ShelfSchemaOut]:  # noqa: ARG001, D103
-    bookcase: Bookcase = await aget_object_or_404(Bookcase, id=bookcase_id)  # pyright: ignore[reportUnknownVariableType]
+    bookcase = await aget_object_or_404(Bookcase, id=bookcase_id)
     return [ShelfSchemaOut.from_orm(shelf) async for shelf in bookcase.shelves.all()]
 
 
 @router.delete("/bookcases/{bookcase_id}", tags=["bookcase"])
 async def delete_bookcase(request: HttpRequest, bookcase_id: int) -> DefaultDeleteSuccessResponse:  # noqa: ARG001, D103
-    bookcase: Bookcase = await aget_object_or_404(Bookcase, id=bookcase_id)  # pyright: ignore[reportUnknownVariableType]
-    await bookcase.adelete()  # pyright: ignore[reportUnknownMemberType]
+    bookcase = await aget_object_or_404(Bookcase, id=bookcase_id)
+    await bookcase.adelete()
     return {"success": True}
 
 
@@ -81,26 +80,25 @@ async def list_collections(request: HttpRequest) -> list[CollectionSchemaOut]:  
 
 @router.get("/collections/{collection_id}", response=CollectionSchemaOut, tags=["collection"])
 async def get_collection(request: HttpRequest, collection_id: int) -> Collection:  # noqa: ARG001, D103
-    collection: Collection = await aget_object_or_404(Collection, id=collection_id)  # pyright: ignore[reportUnknownVariableType]
-    return collection  # pyright: ignore[reportUnknownVariableType]
+    return await aget_object_or_404(Collection, id=collection_id)
 
 
 @router.get("/collections/{collection_id}/media", response=list[PhysicalMediaSchema], tags=["collection", "physical_media"])
-async def get_collection_media_list(request: HttpRequest, collection_id: int) -> list[ShelfSchemaOut]:  # noqa: ARG001, D103
-    collection: Collection = await aget_object_or_404(Collection, id=collection_id)  # pyright: ignore[reportUnknownVariableType]
+async def get_collection_media_list(request: HttpRequest, collection_id: int) -> list[PhysicalMediaSchema]:  # noqa: ARG001, D103
+    collection = await aget_object_or_404(Collection, id=collection_id)
     return [PhysicalMediaSchema.from_orm(shelf) async for shelf in collection.physical_media_set.all()]
 
 
 @router.get("/collections/{collection_id}/media/{media_id}", response=PhysicalMediaSchema, tags=["collection", "physical_media"])
-async def get_collection_media(request: HttpRequest, collection_id: int, media_id: int) -> ShelfSchemaOut:  # noqa: ARG001, D103
-    collection: Collection = await aget_object_or_404(Collection, id=collection_id)  # pyright: ignore[reportUnknownVariableType]
-    return collection.physical_media_set.aget(id=media_id)
+async def get_collection_media(request: HttpRequest, collection_id: int, media_id: int) -> PhysicalMedia:  # noqa: ARG001, D103
+    collection: Collection = await aget_object_or_404(Collection, id=collection_id)
+    return await collection.physical_media_set.aget(id=media_id)
 
 
 @router.delete("/collections/{collection_id}", tags=["collection"])
 async def delete_collection(request: HttpRequest, collection_id: int) -> DefaultDeleteSuccessResponse:  # noqa: ARG001, D103
-    collection: Collection = await aget_object_or_404(Collection, id=collection_id)  # pyright: ignore[reportUnknownVariableType]
-    await collection.adelete()  # pyright: ignore[reportUnknownMemberType]
+    collection = await aget_object_or_404(Collection, id=collection_id)
+    await collection.adelete()
     return {"success": True}
 
 
@@ -118,14 +116,13 @@ async def list_media_case_dimensions(request: HttpRequest) -> list[MediaCaseDime
 
 @router.get("/media_case_dimensions/{media_case_dimensions_id}", response=MediaCaseDimensionSchemaOut, tags=["media_case_dimensions"])
 async def get_media_case_dimensions(request: HttpRequest, media_case_dimensions_id: int) -> MediaCaseDimensions:  # noqa: ARG001, D103
-    media_case_dimensions: MediaCaseDimensions = await aget_object_or_404(MediaCaseDimensions, id=media_case_dimensions_id)  # pyright: ignore[reportUnknownVariableType]
-    return media_case_dimensions  # pyright: ignore[reportUnknownVariableType]
+    return await aget_object_or_404(MediaCaseDimensions, id=media_case_dimensions_id)
 
 
 @router.delete("/media_case_dimensions/{media_case_dimensions_id}", tags=["media_case_dimensions"])
 async def delete_media_case_dimensions(request: HttpRequest, media_case_dimensions_id: int) -> DefaultDeleteSuccessResponse:  # noqa: ARG001, D103
-    media_case_dimensions: MediaCaseDimensions = await aget_object_or_404(MediaCaseDimensions, id=media_case_dimensions_id)  # pyright: ignore[reportUnknownVariableType]
-    await media_case_dimensions.adelete()  # pyright: ignore[reportUnknownMemberType]
+    media_case_dimensions = await aget_object_or_404(MediaCaseDimensions, id=media_case_dimensions_id)
+    await media_case_dimensions.adelete()
     return {"success": True}
 
 
@@ -143,14 +140,13 @@ async def list_shelf_dimensions(request: HttpRequest) -> list[ShelfDimensionSche
 
 @router.get("/shelf_dimensions/{shelf_dimensions_id}", response=ShelfDimensionSchemaOut, tags=["shelf_dimensions"])
 async def get_shelf_dimensions(request: HttpRequest, shelf_dimensions_id: int) -> ShelfDimensions:  # noqa: ARG001, D103
-    shelf_dimensions: ShelfDimensions = await aget_object_or_404(ShelfDimensions, id=shelf_dimensions_id)  # pyright: ignore[reportUnknownVariableType]
-    return shelf_dimensions  # pyright: ignore[reportUnknownVariableType]
+    return await aget_object_or_404(ShelfDimensions, id=shelf_dimensions_id)
 
 
 @router.delete("/shelf_dimensions/{shelf_dimensions_id}", tags=["shelf_dimensions"])
 async def delete_shelf_dimensions(request: HttpRequest, shelf_dimensions_id: int) -> DefaultDeleteSuccessResponse:  # noqa: ARG001, D103
-    shelf_dimensions: ShelfDimensions = await aget_object_or_404(ShelfDimensions, id=shelf_dimensions_id)  # pyright: ignore[reportUnknownVariableType]
-    await shelf_dimensions.adelete()  # pyright: ignore[reportUnknownMemberType]
+    shelf_dimensions = await aget_object_or_404(ShelfDimensions, id=shelf_dimensions_id)
+    await shelf_dimensions.adelete()
     return {"success": True}
 
 
@@ -169,11 +165,10 @@ async def list_movies(request: HttpRequest, filters: Annotated[MovieFilterSchema
 
 @router.get("/movies/{movie_id}", response=MovieSchemaOut, tags=["movies"])
 async def get_movie(request: HttpRequest, movie_id: int) -> Movie:  # noqa: ARG001, D103
-    movie: Movie = await aget_object_or_404(Movie, id=movie_id)  # pyright: ignore[reportUnknownVariableType]
-    return movie  # pyright: ignore[reportUnknownVariableType]
+    return await aget_object_or_404(Movie, id=movie_id)
 
 
 @router.get("/movies/{movie_id}/physical_media", response=list[PhysicalMediaSchema], tags=["movies", "physical_media"])
 async def get_movie_physical_media(request: HttpRequest, movie_id: int) -> list[PhysicalMediaSchema]:  # noqa: ARG001, D103
-    movie: Movie = await aget_object_or_404(Movie, id=movie_id)  # pyright: ignore[reportUnknownVariableType]
+    movie: Movie = await aget_object_or_404(Movie, id=movie_id)
     return [PhysicalMediaSchema.from_orm(medium) async for medium in movie.physical_media_set.all()]
