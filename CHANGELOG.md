@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/mitch-jensen/movie_database/compare/v0.3.0...v0.4.0) (2025-08-06)
+
+
+### Features
+
+* add more API endpoints, schemas and introduce tags ([#50](https://github.com/mitch-jensen/movie_database/issues/50)) ([dd1b778](https://github.com/mitch-jensen/movie_database/commit/dd1b778f517ba90d0d6f7efa053780dc4b84fb9c))
+
 ## [0.3.0](https://github.com/mitch-jensen/movie_database/compare/v0.2.0...v0.3.0) (2025-07-29)
 
 
