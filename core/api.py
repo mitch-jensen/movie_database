@@ -1,7 +1,8 @@
 from ninja import NinjaAPI
+from ninja.pagination import RouterPaginated
 
 from movie_database.api import router as movie_router
 
-api = NinjaAPI()
+api = NinjaAPI(default_router=RouterPaginated())
 
 api.add_router("/movie_database/", movie_router)

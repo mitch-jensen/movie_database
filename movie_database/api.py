@@ -3,7 +3,6 @@ from typing import Annotated, Literal, TypedDict
 from django.http import HttpRequest
 from django.shortcuts import aget_object_or_404
 from ninja import Query, Router
-from ninja.pagination import paginate
 
 from .models import Bookcase, Collection, MediaCaseDimensions, Movie, ShelfDimensions
 from .schema import (
@@ -44,7 +43,6 @@ async def create_bookcase(request: HttpRequest, payload: BookcaseSchemaIn) -> De
 
 
 @router.get("/bookcases", response=list[BookcaseSchemaOut], tags=["bookcase"])
-@paginate
 async def list_bookcases(request: HttpRequest) -> list[BookcaseSchemaOut]:  # noqa: ARG001, D103
     bookcase = Bookcase.objects.all()
     return [BookcaseSchemaOut.from_orm(m) async for m in bookcase]
@@ -57,7 +55,6 @@ async def get_bookcase(request: HttpRequest, bookcase_id: int) -> Bookcase:  # n
 
 
 @router.get("/bookcases/{bookcase_id}/shelves", response=list[ShelfSchemaOut], tags=["bookcase", "shelf"])
-@paginate
 async def get_bookcase_shelves(request: HttpRequest, bookcase_id: int) -> list[ShelfSchemaOut]:  # noqa: ARG001, D103
     bookcase: Bookcase = await aget_object_or_404(Bookcase, id=bookcase_id)  # pyright: ignore[reportUnknownVariableType]
     return [ShelfSchemaOut.from_orm(shelf) async for shelf in bookcase.shelves.all()]
@@ -77,7 +74,6 @@ async def create_collection(request: HttpRequest, payload: CollectionSchemaIn) -
 
 
 @router.get("/collections", response=list[CollectionSchemaOut], tags=["collection"])
-@paginate
 async def list_collections(request: HttpRequest) -> list[CollectionSchemaOut]:  # noqa: ARG001, D103
     collection = Collection.objects.all()
     return [CollectionSchemaOut.from_orm(m) async for m in collection]
@@ -90,10 +86,15 @@ async def get_collection(request: HttpRequest, collection_id: int) -> Collection
 
 
 @router.get("/collections/{collection_id}/media", response=list[PhysicalMediaSchema], tags=["collection", "physical_media"])
-@paginate
-async def get_collection_media(request: HttpRequest, collection_id: int) -> list[ShelfSchemaOut]:  # noqa: ARG001, D103
+async def get_collection_media_list(request: HttpRequest, collection_id: int) -> list[ShelfSchemaOut]:  # noqa: ARG001, D103
     collection: Collection = await aget_object_or_404(Collection, id=collection_id)  # pyright: ignore[reportUnknownVariableType]
     return [PhysicalMediaSchema.from_orm(shelf) async for shelf in collection.physical_media_set.all()]
+
+
+@router.get("/collections/{collection_id}/media/{media_id}", response=PhysicalMediaSchema, tags=["collection", "physical_media"])
+async def get_collection_media(request: HttpRequest, collection_id: int, media_id: int) -> ShelfSchemaOut:  # noqa: ARG001, D103
+    collection: Collection = await aget_object_or_404(Collection, id=collection_id)  # pyright: ignore[reportUnknownVariableType]
+    return collection.physical_media_set.aget(id=media_id)
 
 
 @router.delete("/collections/{collection_id}", tags=["collection"])
@@ -110,7 +111,6 @@ async def create_media_case_dimensions(request: HttpRequest, payload: MediaCaseD
 
 
 @router.get("/media_case_dimensions", response=list[MediaCaseDimensionSchemaOut], tags=["media_case_dimensions"])
-@paginate
 async def list_media_case_dimensions(request: HttpRequest) -> list[MediaCaseDimensionSchemaOut]:  # noqa: ARG001, D103
     media_case_dimensions = MediaCaseDimensions.objects.all()
     return [MediaCaseDimensionSchemaOut.from_orm(m) async for m in media_case_dimensions]
@@ -136,7 +136,6 @@ async def create_shelf_dimensions(request: HttpRequest, payload: ShelfDimensionS
 
 
 @router.get("/shelf_dimensions", response=list[ShelfDimensionSchemaOut], tags=["shelf_dimensions"])
-@paginate
 async def list_shelf_dimensions(request: HttpRequest) -> list[ShelfDimensionSchemaOut]:  # noqa: ARG001, D103
     shelf_dimensions = ShelfDimensions.objects.all()
     return [ShelfDimensionSchemaOut.from_orm(m) async for m in shelf_dimensions]
@@ -162,7 +161,6 @@ async def create_movie(request: HttpRequest, payload: MovieSchemaIn) -> DefaultP
 
 
 @router.get("/movies", response=list[MovieSchemaOut], tags=["movies"])
-@paginate
 async def list_movies(request: HttpRequest, filters: Annotated[MovieFilterSchema, Query()]) -> list[MovieSchemaOut]:  # noqa: ARG001, D103
     movies = Movie.objects.all()
     movies = filters.filter(movies)
