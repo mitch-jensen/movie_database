@@ -24,6 +24,18 @@ class MediaCaseDimensionFilterSchema(FilterSchema):  # noqa: D101
     release_year: int | None = Field(None)
 
 
+class ShelfDimensionSchemaOut(ModelSchema):  # noqa: D101
+    class Meta:  # noqa: D106
+        model = MediaCaseDimensions
+        fields = ("id", "width", "height", "depth")
+
+
+class ShelfDimensionSchemaIn(ModelSchema):  # noqa: D101
+    class Meta:  # noqa: D106
+        model = MediaCaseDimensions
+        fields = ("width", "height", "depth")
+
+
 class MovieSchemaOut(ModelSchema):  # noqa: D101
     class Meta:  # noqa: D106
         model = Movie

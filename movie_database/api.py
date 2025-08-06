@@ -5,8 +5,16 @@ from django.shortcuts import aget_object_or_404
 from ninja import Query, Router
 from ninja.pagination import paginate
 
-from .models import MediaCaseDimensions, Movie
-from .schema import MediaCaseDimensionSchemaIn, MediaCaseDimensionSchemaOut, MovieFilterSchema, MovieSchemaIn, MovieSchemaOut
+from .models import MediaCaseDimensions, Movie, ShelfDimensions
+from .schema import (
+    MediaCaseDimensionSchemaIn,
+    MediaCaseDimensionSchemaOut,
+    MovieFilterSchema,
+    MovieSchemaIn,
+    MovieSchemaOut,
+    ShelfDimensionSchemaIn,
+    ShelfDimensionSchemaOut,
+)
 
 router = Router()
 
@@ -46,6 +54,32 @@ async def get_media_case_dimensions(request: HttpRequest, media_case_dimensions_
 async def delete_media_case_dimensions(request: HttpRequest, media_case_dimensions_id: int) -> DefaultDeleteSuccessResponse:  # noqa: ARG001, D103
     media_case_dimensions: MediaCaseDimensions = await aget_object_or_404(MediaCaseDimensions, id=media_case_dimensions_id)  # pyright: ignore[reportUnknownVariableType]
     await media_case_dimensions.adelete()  # pyright: ignore[reportUnknownMemberType]
+    return {"success": True}
+
+
+@router.post("/shelf_dimensions", tags=["shelf_dimensions"])
+async def create_shelf_dimensions(request: HttpRequest, payload: ShelfDimensionSchemaIn) -> DefaultPostSuccessResponse:  # noqa: ARG001, D103
+    shelf_dimensions = await ShelfDimensions.objects.acreate(**payload.dict())
+    return {"id": shelf_dimensions.id}
+
+
+@router.get("/shelf_dimensions", response=list[ShelfDimensionSchemaOut], tags=["shelf_dimensions"])
+@paginate
+async def list_shelf_dimensions(request: HttpRequest) -> list[ShelfDimensionSchemaOut]:  # noqa: ARG001, D103
+    shelf_dimensions = ShelfDimensions.objects.all()
+    return [ShelfDimensionSchemaOut.from_orm(m) async for m in shelf_dimensions]
+
+
+@router.get("/shelf_dimensions/{shelf_dimensions_id}", response=ShelfDimensionSchemaOut, tags=["shelf_dimensions"])
+async def get_shelf_dimensions(request: HttpRequest, shelf_dimensions_id: int) -> ShelfDimensions:  # noqa: ARG001, D103
+    shelf_dimensions: ShelfDimensions = await aget_object_or_404(ShelfDimensions, id=shelf_dimensions_id)  # pyright: ignore[reportUnknownVariableType]
+    return shelf_dimensions  # pyright: ignore[reportUnknownVariableType]
+
+
+@router.delete("/shelf_dimensions/{shelf_dimensions_id}", tags=["shelf_dimensions"])
+async def delete_shelf_dimensions(request: HttpRequest, shelf_dimensions_id: int) -> DefaultDeleteSuccessResponse:  # noqa: ARG001, D103
+    shelf_dimensions: ShelfDimensions = await aget_object_or_404(ShelfDimensions, id=shelf_dimensions_id)  # pyright: ignore[reportUnknownVariableType]
+    await shelf_dimensions.adelete()  # pyright: ignore[reportUnknownMemberType]
     return {"success": True}
 
 
