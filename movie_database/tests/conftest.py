@@ -5,7 +5,7 @@ from typing import Protocol
 
 import pytest_asyncio
 
-from movie_database.models import Bookcase, Collection, MediaCaseDimension, MediaFormat, Movie, PhysicalMedia, PhysicalMediaOrientation, Shelf, ShelfDimension
+from movie_database.models import Bookcase, Collection, MediaCaseDimension, Movie, PhysicalMedia, PhysicalMediaOrientation, Shelf, ShelfDimension
 
 
 class BookcaseCreator(Protocol):  # noqa: D101
@@ -28,7 +28,7 @@ class CollectionCreator(Protocol):  # noqa: D101
 class MediaCaseDimensionCreator(Protocol):  # noqa: D101
     def __call__(  # noqa: D102
         self,
-        media_format: MediaFormat = ...,
+        media_format: MediaCaseDimension.MediaFormat = ...,
         description: str = ...,
         width: Decimal = ...,
         height: Decimal = ...,
@@ -120,13 +120,13 @@ async def make_media_case_dimension() -> MediaCaseDimensionCreator:
     """
 
     async def _make_media_case_dimension(
-        media_format: MediaFormat | None = None,
+        media_format: MediaCaseDimension.MediaFormat | None = None,
         description: str | None = None,
         width: Decimal | None = None,
         height: Decimal | None = None,
         depth: Decimal | None = None,
     ) -> MediaCaseDimension:
-        _media_format: MediaFormat = media_format or MediaFormat.BLURAY
+        _media_format: MediaCaseDimension.MediaFormat = media_format or MediaCaseDimension.MediaFormat.BLURAY
         _description: str = description or "This is a description."
         _width: Decimal = width or Decimal(str(random.uniform(90.0, 128.0)))  # noqa: S311
         _height: Decimal = height or Decimal(str(random.uniform(90.0, 128.0)))  # noqa: S311

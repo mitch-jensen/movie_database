@@ -8,15 +8,6 @@ if TYPE_CHECKING:
     from django.db.models.manager import RelatedManager
 
 
-class MediaFormat(models.TextChoices):
-    """Choices for Physical Media formats."""
-
-    DVD = "DVD", "DVD"
-    BLURAY = "BD", "Blu-ray"
-    VHS = "VHS", "VHS"
-    UHD_4K = "4K", "4K UHD"
-
-
 class Dimension(models.Model):
     """Abstract model representing anything with a width, height and depth."""
 
@@ -26,25 +17,6 @@ class Dimension(models.Model):
 
     class Meta:  # noqa: D106
         abstract = True
-
-
-class MediaCaseDimension(Dimension):
-    """Represents the dimensions of a media case."""
-
-    id: int
-    media_format = models.CharField(max_length=3, choices=MediaFormat.choices)
-    description = models.CharField(max_length=255, blank=False)
-    physical_media_set: "RelatedManager['PhysicalMedia']"
-
-    class Meta:  # pyright: ignore[reportIncompatibleVariableOverride] # noqa: D106
-        verbose_name = "Media Case Dimensions"
-        verbose_name_plural = "Media Case Dimensions"
-
-    def __repr__(self) -> str:  # noqa: D105
-        return f"<MediaCaseDimension ({self.media_format}): {self.width:.2f}W x {self.height:.2f}H x {self.depth:.2f}D>"
-
-    def __str__(self) -> str:  # noqa: D105
-        return f"{self.width:.2f}W x {self.height:.2f}H x {self.depth:.2f}D"
 
 
 class ShelfDimension(Dimension):
@@ -62,6 +34,33 @@ class ShelfDimension(Dimension):
 
     def __str__(self) -> str:  # noqa: D105
         return f"{self.width:.2f} x {self.height:.2f} x {self.depth:.2f}"
+
+
+class MediaCaseDimension(Dimension):
+    """Represents the dimensions of a media case."""
+
+    class MediaFormat(models.TextChoices):
+        """Choices for Physical Media formats."""
+
+        DVD = "DVD", "DVD"
+        BLURAY = "BD", "Blu-ray"
+        VHS = "VHS", "VHS"
+        UHD_4K = "4K", "4K UHD"
+
+    id: int
+    media_format = models.CharField(max_length=3, choices=MediaFormat.choices)
+    description = models.CharField(max_length=255, blank=False)
+    physical_media_set: "RelatedManager['PhysicalMedia']"
+
+    class Meta:  # pyright: ignore[reportIncompatibleVariableOverride] # noqa: D106
+        verbose_name = "Media Case Dimensions"
+        verbose_name_plural = "Media Case Dimensions"
+
+    def __repr__(self) -> str:  # noqa: D105
+        return f"<MediaCaseDimension ({self.media_format}): {self.width:.2f}W x {self.height:.2f}H x {self.depth:.2f}D>"
+
+    def __str__(self) -> str:  # noqa: D105
+        return f"{self.width:.2f}W x {self.height:.2f}H x {self.depth:.2f}D"
 
 
 class PhysicalMediaOrientation(models.TextChoices):

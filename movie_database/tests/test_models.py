@@ -6,7 +6,7 @@ from asgiref.sync import sync_to_async
 from django.db import IntegrityError, models
 from model_bakery import baker
 
-from movie_database.models import Bookcase, Collection, MediaCaseDimension, MediaFormat, Movie, PhysicalMedia, PhysicalMediaOrientation, Shelf, TMDbProfile
+from movie_database.models import Bookcase, Collection, MediaCaseDimension, Movie, PhysicalMedia, PhysicalMediaOrientation, Shelf, TMDbProfile
 
 
 async def abake[T: models.Model](model: type[T], *args: Any, **kwargs: Any) -> T:  # noqa: ANN401
@@ -243,7 +243,7 @@ class TestMediaCaseDimension:
         """Test the string representation of the MediaCaseDimension model."""
         dimensions = await abake(
             MediaCaseDimension,
-            media_format=MediaFormat.DVD,
+            media_format=MediaCaseDimension.MediaFormat.DVD,
             description="DVD (Standard)",
             width=Decimal("100.01"),
             height=Decimal("101.00"),
@@ -256,7 +256,7 @@ class TestMediaCaseDimension:
     async def test_bluray_us_standard_exists(self):
         """Test if the Blu-ray US Standard dimensions exist."""
         assert await MediaCaseDimension.objects.filter(
-            media_format=MediaFormat.BLURAY,
+            media_format=MediaCaseDimension.MediaFormat.BLURAY,
             description="Blu-ray (US Standard)",
             width=128.50,
             height=148.00,
@@ -268,7 +268,7 @@ class TestMediaCaseDimension:
     async def test_bluray_uk_standard_exists(self):
         """Test if the Blu-ray UK Standard dimensions exist."""
         assert await MediaCaseDimension.objects.filter(
-            media_format=MediaFormat.BLURAY,
+            media_format=MediaCaseDimension.MediaFormat.BLURAY,
             description="Blu-ray (UK Standard)",
             width=148.00,
             height=129.00,
@@ -280,7 +280,7 @@ class TestMediaCaseDimension:
     async def test_dvd_standard_exists(self):
         """Test if the DVD Standard dimensions exist."""
         assert await MediaCaseDimension.objects.filter(
-            media_format=MediaFormat.DVD,
+            media_format=MediaCaseDimension.MediaFormat.DVD,
             description="DVD (Standard)",
             width=130.00,
             height=184.00,
