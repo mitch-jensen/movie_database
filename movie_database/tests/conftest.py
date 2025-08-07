@@ -28,7 +28,7 @@ class CollectionCreator(Protocol):  # noqa: D101
 class MediaCaseDimensionCreator(Protocol):  # noqa: D101
     def __call__(  # noqa: D102
         self,
-        media_format: MediaCaseDimension.MediaFormat = ...,
+        media_format: MediaCaseDimension.Format = ...,
         description: str = ...,
         width: Decimal = ...,
         height: Decimal = ...,
@@ -120,13 +120,13 @@ async def make_media_case_dimension() -> MediaCaseDimensionCreator:
     """
 
     async def _make_media_case_dimension(
-        media_format: MediaCaseDimension.MediaFormat | None = None,
+        media_format: MediaCaseDimension.Format | None = None,
         description: str | None = None,
         width: Decimal | None = None,
         height: Decimal | None = None,
         depth: Decimal | None = None,
     ) -> MediaCaseDimension:
-        _media_format: MediaCaseDimension.MediaFormat = media_format or MediaCaseDimension.MediaFormat.BLURAY
+        _media_format: MediaCaseDimension.Format = media_format or MediaCaseDimension.Format.BLURAY
         _description: str = description or "This is a description."
         _width: Decimal = width or Decimal(str(random.uniform(90.0, 128.0)))  # noqa: S311
         _height: Decimal = height or Decimal(str(random.uniform(90.0, 128.0)))  # noqa: S311

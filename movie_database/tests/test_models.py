@@ -243,7 +243,7 @@ class TestMediaCaseDimension:
         """Test the string representation of the MediaCaseDimension model."""
         dimensions = await abake(
             MediaCaseDimension,
-            media_format=MediaCaseDimension.MediaFormat.DVD,
+            media_format=MediaCaseDimension.Format.DVD,
             description="DVD (Standard)",
             width=Decimal("100.01"),
             height=Decimal("101.00"),
@@ -256,7 +256,7 @@ class TestMediaCaseDimension:
     async def test_bluray_us_standard_exists(self):
         """Test if the Blu-ray US Standard dimensions exist."""
         assert await MediaCaseDimension.objects.filter(
-            media_format=MediaCaseDimension.MediaFormat.BLURAY,
+            media_format=MediaCaseDimension.Format.BLURAY,
             description="Blu-ray (US Standard)",
             width=128.50,
             height=148.00,
@@ -268,7 +268,7 @@ class TestMediaCaseDimension:
     async def test_bluray_uk_standard_exists(self):
         """Test if the Blu-ray UK Standard dimensions exist."""
         assert await MediaCaseDimension.objects.filter(
-            media_format=MediaCaseDimension.MediaFormat.BLURAY,
+            media_format=MediaCaseDimension.Format.BLURAY,
             description="Blu-ray (UK Standard)",
             width=148.00,
             height=129.00,
@@ -280,7 +280,7 @@ class TestMediaCaseDimension:
     async def test_dvd_standard_exists(self):
         """Test if the DVD Standard dimensions exist."""
         assert await MediaCaseDimension.objects.filter(
-            media_format=MediaCaseDimension.MediaFormat.DVD,
+            media_format=MediaCaseDimension.Format.DVD,
             description="DVD (Standard)",
             width=130.00,
             height=184.00,

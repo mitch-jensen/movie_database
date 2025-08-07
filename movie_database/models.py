@@ -39,8 +39,8 @@ class ShelfDimension(Dimension):
 class MediaCaseDimension(Dimension):
     """Represents the dimensions of a media case."""
 
-    class MediaFormat(models.TextChoices):
-        """Choices for Physical Media formats."""
+    class Format(models.TextChoices):
+        """Physical media formats."""
 
         DVD = "DVD", "DVD"
         BLURAY = "BD", "Blu-ray"
@@ -48,7 +48,7 @@ class MediaCaseDimension(Dimension):
         UHD_4K = "4K", "4K UHD"
 
     id: int
-    media_format = models.CharField(max_length=3, choices=MediaFormat.choices)
+    media_format = models.CharField(max_length=3, choices=Format.choices)
     description = models.CharField(max_length=255, blank=False)
     physical_media_set: "RelatedManager['PhysicalMedia']"
 
