@@ -11,9 +11,9 @@ if TYPE_CHECKING:
 class Dimension(models.Model):
     """Abstract model representing anything with a width, height and depth."""
 
-    width = models.DecimalField(max_digits=5, decimal_places=2)
-    height = models.DecimalField(max_digits=5, decimal_places=2)
-    depth = models.DecimalField(max_digits=5, decimal_places=2)
+    width = models.DecimalField(max_digits=5, decimal_places=2, help_text="Width in mm", validators=[MinValueValidator(0)])
+    height = models.DecimalField(max_digits=5, decimal_places=2, help_text="Width in mm", validators=[MinValueValidator(0)])
+    depth = models.DecimalField(max_digits=5, decimal_places=2, help_text="Width in mm", validators=[MinValueValidator(0)])
 
     class Meta:  # noqa: D106
         abstract = True
