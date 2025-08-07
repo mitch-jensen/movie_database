@@ -47,7 +47,7 @@ class MediaCaseDimension(Dimension):
         return f"{self.width:.2f}W x {self.height:.2f}H x {self.depth:.2f}D"
 
 
-class ShelfDimensions(Dimension):
+class ShelfDimension(Dimension):
     """Represents the dimensions of a shelf."""
 
     id: int
@@ -58,7 +58,7 @@ class ShelfDimensions(Dimension):
         verbose_name_plural = "Shelf Dimensions"
 
     def __repr__(self) -> str:  # noqa: D105
-        return f"<ShelfDimensions: {self.width:.2f} x {self.height:.2f} x {self.depth:.2f}>"
+        return f"<ShelfDimension: {self.width:.2f} x {self.height:.2f} x {self.depth:.2f}>"
 
     def __str__(self) -> str:  # noqa: D105
         return f"{self.width:.2f} x {self.height:.2f} x {self.depth:.2f}"
@@ -83,8 +83,8 @@ class Shelf(models.Model):
         related_name="shelves",
     )
     dimensions_id: int
-    dimensions = models.ForeignKey["ShelfDimensions"](
-        "ShelfDimensions",
+    dimensions = models.ForeignKey["ShelfDimension"](
+        "ShelfDimension",
         on_delete=models.PROTECT,
         related_name="shelves",
     )

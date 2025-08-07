@@ -6,7 +6,7 @@ from ninja import Query, Router
 
 import movie_database.schema as schemas
 
-from .models import Bookcase, Collection, MediaCaseDimension, Movie, PhysicalMedia, ShelfDimensions
+from .models import Bookcase, Collection, MediaCaseDimension, Movie, PhysicalMedia, ShelfDimension
 
 router = Router()
 
@@ -113,27 +113,27 @@ async def delete_media_case_dimension(request: HttpRequest, media_case_dimension
     return {"success": True}
 
 
-@router.post("/shelf_dimensions", tags=["shelf_dimensions"])
-async def create_shelf_dimensions(request: HttpRequest, payload: schemas.ShelfDimensionIn) -> DefaultPostSuccessResponse:  # noqa: ARG001, D103
-    shelf_dimensions = await ShelfDimensions.objects.acreate(**payload.dict())
-    return {"id": shelf_dimensions.id}
+@router.post("/shelf_dimensions", tags=["shelf_dimension"])
+async def create_shelf_dimension(request: HttpRequest, payload: schemas.ShelfDimensionIn) -> DefaultPostSuccessResponse:  # noqa: ARG001, D103
+    shelf_dimension = await ShelfDimension.objects.acreate(**payload.dict())
+    return {"id": shelf_dimension.id}
 
 
-@router.get("/shelf_dimensions", response=list[schemas.ShelfDimensionOut], tags=["shelf_dimensions"])
+@router.get("/shelf_dimensions", response=list[schemas.ShelfDimensionOut], tags=["shelf_dimension"])
 async def list_shelf_dimensions(request: HttpRequest) -> list[schemas.ShelfDimensionOut]:  # noqa: ARG001, D103
-    shelf_dimensions = ShelfDimensions.objects.all()
+    shelf_dimensions = ShelfDimension.objects.all()
     return [schemas.ShelfDimensionOut.from_orm(m) async for m in shelf_dimensions]
 
 
-@router.get("/shelf_dimensions/{shelf_dimensions_id}", response=schemas.ShelfDimensionOut, tags=["shelf_dimensions"])
-async def get_shelf_dimensions(request: HttpRequest, shelf_dimensions_id: int) -> ShelfDimensions:  # noqa: ARG001, D103
-    return await aget_object_or_404(ShelfDimensions, id=shelf_dimensions_id)
+@router.get("/shelf_dimensions/{shelf_dimension_id}", response=schemas.ShelfDimensionOut, tags=["shelf_dimension"])
+async def get_shelf_dimension(request: HttpRequest, shelf_dimension_id: int) -> ShelfDimension:  # noqa: ARG001, D103
+    return await aget_object_or_404(ShelfDimension, id=shelf_dimension_id)
 
 
-@router.delete("/shelf_dimensions/{shelf_dimensions_id}", tags=["shelf_dimensions"])
-async def delete_shelf_dimensions(request: HttpRequest, shelf_dimensions_id: int) -> DefaultDeleteSuccessResponse:  # noqa: ARG001, D103
-    shelf_dimensions = await aget_object_or_404(ShelfDimensions, id=shelf_dimensions_id)
-    await shelf_dimensions.adelete()
+@router.delete("/shelf_dimensions/{shelf_dimension_id}", tags=["shelf_dimension"])
+async def delete_shelf_dimension(request: HttpRequest, shelf_dimension_id: int) -> DefaultDeleteSuccessResponse:  # noqa: ARG001, D103
+    shelf_dimension = await aget_object_or_404(ShelfDimension, id=shelf_dimension_id)
+    await shelf_dimension.adelete()
     return {"success": True}
 
 
