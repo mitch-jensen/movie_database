@@ -146,7 +146,7 @@ class TestShelfAccommodation:
         should_fit: bool,
     ):
         """Test that Shelf.can_fit_media behaves correctly for vertical orientations."""
-        media: PhysicalMedia = await abake(PhysicalMedia, **{f"case_dimensions__{dimension}": media_dimension})
+        media: PhysicalMedia = await abake(PhysicalMedia, **{f"dimensions__{dimension}": media_dimension})
         shelf: Shelf = await abake(Shelf, **{f"dimensions__{dimension}": shelf_dimension, "orientation": orientation})
 
         assert shelf.can_fit_media(media) == should_fit
@@ -203,7 +203,7 @@ class TestShelfAccommodation:
         expected_used_space: Decimal,
     ):
         """Test that Shelf.used_space is always the sum of physical media widths varying numbers of physical media present."""
-        media: list[PhysicalMedia] = [await abake(PhysicalMedia, case_dimensions__height=media_width) for media_width in media_heights]
+        media: list[PhysicalMedia] = [await abake(PhysicalMedia, dimensions__height=media_width) for media_width in media_heights]
         shelf: Shelf = await abake(Shelf, dimensions__height=shelf_height, orientation=Shelf.Orientation.VERTICAL)
         await shelf.physical_media_set.aadd(*media)
 
@@ -227,7 +227,7 @@ class TestShelfAccommodation:
         expected_used_space: Decimal,
     ):
         """Test that Shelf.used_space is always the sum of physical media widths varying numbers of physical media present."""
-        media: list[PhysicalMedia] = [await abake(PhysicalMedia, case_dimensions__width=media_width) for media_width in media_widths]
+        media: list[PhysicalMedia] = [await abake(PhysicalMedia, dimensions__width=media_width) for media_width in media_widths]
         shelf: Shelf = await abake(Shelf, dimensions__width=shelf_width, orientation=Shelf.Orientation.HORIZONTAL)
         await shelf.physical_media_set.aadd(*media)
 
