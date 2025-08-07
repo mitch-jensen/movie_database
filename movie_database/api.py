@@ -70,13 +70,13 @@ async def get_collection(request: HttpRequest, collection_id: int) -> Collection
     return await aget_object_or_404(Collection, id=collection_id)
 
 
-@router.get("/collections/{collection_id}/media", response=list[schemas.PhysicalMedia], tags=["collection", "physical_media"])
-async def get_collection_media_list(request: HttpRequest, collection_id: int) -> list[schemas.PhysicalMedia]:  # noqa: ARG001, D103
+@router.get("/collections/{collection_id}/media", response=list[schemas.PhysicalMediaOut], tags=["collection", "physical_media"])
+async def get_collection_media_list(request: HttpRequest, collection_id: int) -> list[schemas.PhysicalMediaOut]:  # noqa: ARG001, D103
     collection = await aget_object_or_404(Collection, id=collection_id)
-    return [schemas.PhysicalMedia.from_orm(shelf) async for shelf in collection.physical_media_set.all()]
+    return [schemas.PhysicalMediaOut.from_orm(shelf) async for shelf in collection.physical_media_set.all()]
 
 
-@router.get("/collections/{collection_id}/media/{media_id}", response=schemas.PhysicalMedia, tags=["collection", "physical_media"])
+@router.get("/collections/{collection_id}/media/{media_id}", response=schemas.PhysicalMediaOut, tags=["collection", "physical_media"])
 async def get_collection_media(request: HttpRequest, collection_id: int, media_id: int) -> PhysicalMedia:  # noqa: ARG001, D103
     collection: Collection = await aget_object_or_404(Collection, id=collection_id)
     return await collection.physical_media_set.aget(id=media_id)
@@ -155,7 +155,7 @@ async def get_movie(request: HttpRequest, movie_id: int) -> Movie:  # noqa: ARG0
     return await aget_object_or_404(Movie, id=movie_id)
 
 
-@router.get("/movies/{movie_id}/physical_media", response=list[schemas.PhysicalMedia], tags=["movies", "physical_media"])
-async def get_movie_physical_media(request: HttpRequest, movie_id: int) -> list[schemas.PhysicalMedia]:  # noqa: ARG001, D103
+@router.get("/movies/{movie_id}/physical_media", response=list[schemas.PhysicalMediaOut], tags=["movies", "physical_media"])
+async def get_movie_physical_media(request: HttpRequest, movie_id: int) -> list[schemas.PhysicalMediaOut]:  # noqa: ARG001, D103
     movie: Movie = await aget_object_or_404(Movie, id=movie_id)
-    return [schemas.PhysicalMedia.from_orm(medium) async for medium in movie.physical_media_set.all()]
+    return [schemas.PhysicalMediaOut.from_orm(medium) async for medium in movie.physical_media_set.all()]
