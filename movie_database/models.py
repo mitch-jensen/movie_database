@@ -278,6 +278,7 @@ class PhysicalMedia(models.Model):
             models.UniqueConstraint(
                 fields=["shelf", "position_on_shelf"],
                 name="unique_position_on_shelf",
+                condition=~models.Q(position_on_shelf=None),
             ),
         )
 
