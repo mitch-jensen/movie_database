@@ -5,7 +5,7 @@ from typing import Protocol
 
 import pytest_asyncio
 
-from movie_database.models import Bookcase, Collection, MediaCaseDimension, Movie, PhysicalMedia, PhysicalMediaOrientation, Shelf, ShelfDimension
+from movie_database.models import Bookcase, Collection, MediaCaseDimension, Movie, PhysicalMedia, Shelf, ShelfDimension
 
 
 class BookcaseCreator(Protocol):  # noqa: D101
@@ -64,7 +64,7 @@ class ShelfCreator(Protocol):  # noqa: D101
         position_from_top: int,
         bookcase: Bookcase,
         dimensions: ShelfDimension = ...,
-        orientation: PhysicalMediaOrientation = ...,
+        orientation: Shelf.ShelfOrientation = ...,
     ) -> Awaitable[Shelf]: ...
 
 
@@ -200,10 +200,10 @@ async def make_shelf(make_shelf_dimension: ShelfDimensionCreator) -> ShelfCreato
         position_from_top: int,
         bookcase: Bookcase,
         dimensions: ShelfDimension | None = None,
-        orientation: PhysicalMediaOrientation | None = None,
+        orientation: Shelf.ShelfOrientation | None = None,
     ) -> Shelf:
         _dimensions: ShelfDimension = dimensions or await make_shelf_dimension()
-        _orientation: PhysicalMediaOrientation = orientation or PhysicalMediaOrientation.HORIZONTAL
+        _orientation: Shelf.ShelfOrientation = orientation or Shelf.ShelfOrientation.HORIZONTAL
         return await Shelf.objects.acreate(position_from_top=position_from_top, bookcase=bookcase, dimensions=_dimensions, orientation=_orientation)
 
     return _make_shelf
