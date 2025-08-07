@@ -39,13 +39,13 @@ class ShelfOut(ModelSchema):  # noqa: D101
 
 class MediaCaseDimensionOut(ModelSchema):  # noqa: D101
     class Meta:  # noqa: D106
-        model = movie_models.MediaCaseDimensions
+        model = movie_models.MediaCaseDimension
         fields = ("id", "width", "height", "depth", "media_format", "description")
 
 
 class MediaCaseDimensionIn(ModelSchema):  # noqa: D101
     class Meta:  # noqa: D106
-        model = movie_models.MediaCaseDimensions
+        model = movie_models.MediaCaseDimension
         fields = ("width", "height", "depth", "media_format", "description")
 
 
@@ -56,13 +56,13 @@ class MediaCaseDimensionFilter(FilterSchema):  # noqa: D101
 
 class ShelfDimensionOut(ModelSchema):  # noqa: D101
     class Meta:  # noqa: D106
-        model = movie_models.MediaCaseDimensions
+        model = movie_models.MediaCaseDimension
         fields = ("id", "width", "height", "depth")
 
 
 class ShelfDimensionIn(ModelSchema):  # noqa: D101
     class Meta:  # noqa: D106
-        model = movie_models.MediaCaseDimensions
+        model = movie_models.MediaCaseDimension
         fields = ("width", "height", "depth")
 
 

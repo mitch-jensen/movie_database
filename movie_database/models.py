@@ -28,7 +28,7 @@ class Dimension(models.Model):
         abstract = True
 
 
-class MediaCaseDimensions(Dimension):
+class MediaCaseDimension(Dimension):
     """Represents the dimensions of a media case."""
 
     id: int
@@ -41,7 +41,7 @@ class MediaCaseDimensions(Dimension):
         verbose_name_plural = "Media Case Dimensions"
 
     def __repr__(self) -> str:  # noqa: D105
-        return f"<MediaCaseDimensions ({self.media_format}): {self.width:.2f}W x {self.height:.2f}H x {self.depth:.2f}D>"
+        return f"<MediaCaseDimension ({self.media_format}): {self.width:.2f}W x {self.height:.2f}H x {self.depth:.2f}D>"
 
     def __str__(self) -> str:  # noqa: D105
         return f"{self.width:.2f}W x {self.height:.2f}H x {self.depth:.2f}D"
@@ -257,8 +257,8 @@ class PhysicalMedia(models.Model):
     )
     position_on_shelf = models.PositiveSmallIntegerField(null=True, blank=True)
     case_dimensions_id: int
-    case_dimensions = models.ForeignKey["MediaCaseDimensions"](
-        "MediaCaseDimensions",
+    case_dimensions = models.ForeignKey["MediaCaseDimension"](
+        "MediaCaseDimension",
         on_delete=models.PROTECT,
         related_name="physical_media_set",
     )

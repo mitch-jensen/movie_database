@@ -5,7 +5,7 @@ from typing import Protocol
 
 import pytest_asyncio
 
-from movie_database.models import Bookcase, Collection, MediaCaseDimensions, MediaFormat, Movie, PhysicalMedia, PhysicalMediaOrientation, Shelf, ShelfDimensions
+from movie_database.models import Bookcase, Collection, MediaCaseDimension, MediaFormat, Movie, PhysicalMedia, PhysicalMediaOrientation, Shelf, ShelfDimensions
 
 
 class BookcaseCreator(Protocol):  # noqa: D101
@@ -33,7 +33,7 @@ class MediaCaseDimensionCreator(Protocol):  # noqa: D101
         width: Decimal = ...,
         height: Decimal = ...,
         depth: Decimal = ...,
-    ) -> Awaitable[MediaCaseDimensions]: ...
+    ) -> Awaitable[MediaCaseDimension]: ...
 
 
 class MovieCreator(Protocol):  # noqa: D101
@@ -52,7 +52,7 @@ class PhysicalMediaCreator(Protocol):  # noqa: D101
         movies: Sequence[Movie],
         shelf: Shelf,
         position_on_shelf: int = ...,
-        case_dimensions: MediaCaseDimensions = ...,
+        case_dimensions: MediaCaseDimension = ...,
         collection: Collection = ...,
         notes: str = ...,
     ) -> Awaitable[PhysicalMedia]: ...
@@ -111,30 +111,30 @@ async def make_collection() -> CollectionCreator:
 
 
 @pytest_asyncio.fixture
-async def make_media_case_dimensions() -> MediaCaseDimensionCreator:
-    """Make a MediaCaseDimensions object.
+async def make_media_case_dimension() -> MediaCaseDimensionCreator:
+    """Make a MediaCaseDimension object.
 
     Returns:
-        MediaCaseDimensionCreator: a factory function to create a MediaCaseDimensions object.
+        MediaCaseDimensionCreator: a factory function to create a MediaCaseDimension object.
 
     """
 
-    async def _make_media_case_dimensions(
+    async def _make_media_case_dimension(
         media_format: MediaFormat | None = None,
         description: str | None = None,
         width: Decimal | None = None,
         height: Decimal | None = None,
         depth: Decimal | None = None,
-    ) -> MediaCaseDimensions:
+    ) -> MediaCaseDimension:
         _media_format: MediaFormat = media_format or MediaFormat.BLURAY
         _description: str = description or "This is a description."
         _width: Decimal = width or Decimal(str(random.uniform(90.0, 128.0)))  # noqa: S311
         _height: Decimal = height or Decimal(str(random.uniform(90.0, 128.0)))  # noqa: S311
         _depth: Decimal = depth or Decimal(str(random.uniform(90.0, 128.0)))  # noqa: S311
 
-        return await MediaCaseDimensions.objects.acreate(media_format=_media_format, description=_description, width=_width, height=_height, depth=_depth)
+        return await MediaCaseDimension.objects.acreate(media_format=_media_format, description=_description, width=_width, height=_height, depth=_depth)
 
-    return _make_media_case_dimensions
+    return _make_media_case_dimension
 
 
 @pytest_asyncio.fixture
@@ -154,7 +154,7 @@ async def make_movie() -> MovieCreator:
 
 
 @pytest_asyncio.fixture
-async def make_physical_media(make_media_case_dimensions: MediaCaseDimensionCreator, make_collection: CollectionCreator) -> PhysicalMediaCreator:
+async def make_physical_media(make_media_case_dimension: MediaCaseDimensionCreator, make_collection: CollectionCreator) -> PhysicalMediaCreator:
     """Make a PhysicalMedia instance.
 
     Returns:
@@ -166,18 +166,18 @@ async def make_physical_media(make_media_case_dimensions: MediaCaseDimensionCrea
         movies: Sequence[Movie],
         shelf: Shelf,
         position_on_shelf: int | None = None,
-        case_dimensions: MediaCaseDimensions | None = None,
+        case_dimensions: MediaCaseDimension | None = None,
         collection: Collection | None = None,
         notes: str | None = None,
     ) -> PhysicalMedia:
         _position_on_shelf: int = position_on_shelf or 1
-        _case_dimensions: MediaCaseDimensions = case_dimensions or await make_media_case_dimensions()
+        _case_dimension: MediaCaseDimension = case_dimensions or await make_media_case_dimension()
         _collection: Collection = collection or await make_collection(name="R")
         _notes: str = notes or "Here are some notes."
         physical_media = await PhysicalMedia.objects.acreate(
             shelf=shelf,
             position_on_shelf=_position_on_shelf,
-            case_dimensions=_case_dimensions,
+            case_dimensions=_case_dimension,
             collection=_collection,
             notes=_notes,
         )

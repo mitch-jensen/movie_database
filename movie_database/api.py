@@ -6,7 +6,7 @@ from ninja import Query, Router
 
 import movie_database.schema as schemas
 
-from .models import Bookcase, Collection, MediaCaseDimensions, Movie, PhysicalMedia, ShelfDimensions
+from .models import Bookcase, Collection, MediaCaseDimension, Movie, PhysicalMedia, ShelfDimensions
 
 router = Router()
 
@@ -89,27 +89,27 @@ async def delete_collection(request: HttpRequest, collection_id: int) -> Default
     return {"success": True}
 
 
-@router.post("/media_case_dimensions", tags=["media_case_dimensions"])
-async def create_media_case_dimensions(request: HttpRequest, payload: schemas.MediaCaseDimensionIn) -> DefaultPostSuccessResponse:  # noqa: ARG001, D103
-    media_case_dimensions = await MediaCaseDimensions.objects.acreate(**payload.dict())
-    return {"id": media_case_dimensions.id}
+@router.post("/media_case_dimensions", tags=["media_case_dimension"])
+async def create_media_case_dimension(request: HttpRequest, payload: schemas.MediaCaseDimensionIn) -> DefaultPostSuccessResponse:  # noqa: ARG001, D103
+    media_case_dimension = await MediaCaseDimension.objects.acreate(**payload.dict())
+    return {"id": media_case_dimension.id}
 
 
-@router.get("/media_case_dimensions", response=list[schemas.MediaCaseDimensionOut], tags=["media_case_dimensions"])
+@router.get("/media_case_dimensions", response=list[schemas.MediaCaseDimensionOut], tags=["media_case_dimension"])
 async def list_media_case_dimensions(request: HttpRequest) -> list[schemas.MediaCaseDimensionOut]:  # noqa: ARG001, D103
-    media_case_dimensions = MediaCaseDimensions.objects.all()
+    media_case_dimensions = MediaCaseDimension.objects.all()
     return [schemas.MediaCaseDimensionOut.from_orm(m) async for m in media_case_dimensions]
 
 
-@router.get("/media_case_dimensions/{media_case_dimensions_id}", response=schemas.MediaCaseDimensionOut, tags=["media_case_dimensions"])
-async def get_media_case_dimensions(request: HttpRequest, media_case_dimensions_id: int) -> MediaCaseDimensions:  # noqa: ARG001, D103
-    return await aget_object_or_404(MediaCaseDimensions, id=media_case_dimensions_id)
+@router.get("/media_case_dimensions/{media_case_dimension_id}", response=schemas.MediaCaseDimensionOut, tags=["media_case_dimension"])
+async def get_media_case_dimension(request: HttpRequest, media_case_dimension_id: int) -> MediaCaseDimension:  # noqa: ARG001, D103
+    return await aget_object_or_404(MediaCaseDimension, id=media_case_dimension_id)
 
 
-@router.delete("/media_case_dimensions/{media_case_dimensions_id}", tags=["media_case_dimensions"])
-async def delete_media_case_dimensions(request: HttpRequest, media_case_dimensions_id: int) -> DefaultDeleteSuccessResponse:  # noqa: ARG001, D103
-    media_case_dimensions = await aget_object_or_404(MediaCaseDimensions, id=media_case_dimensions_id)
-    await media_case_dimensions.adelete()
+@router.delete("/media_case_dimensions/{media_case_dimension_id}", tags=["media_case_dimension"])
+async def delete_media_case_dimension(request: HttpRequest, media_case_dimension_id: int) -> DefaultDeleteSuccessResponse:  # noqa: ARG001, D103
+    media_case_dimension = await aget_object_or_404(MediaCaseDimension, id=media_case_dimension_id)
+    await media_case_dimension.adelete()
     return {"success": True}
 
 
