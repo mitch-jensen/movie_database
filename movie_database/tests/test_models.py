@@ -115,8 +115,8 @@ class TestShelfAccommodation:
     @pytest.mark.parametrize(
         ("orientation", "dimension"),
         [
-            (Shelf.ShelfOrientation.VERTICAL, "height"),
-            (Shelf.ShelfOrientation.HORIZONTAL, "width"),
+            (Shelf.Orientation.VERTICAL, "height"),
+            (Shelf.Orientation.HORIZONTAL, "width"),
         ],
     )
     @pytest.mark.parametrize(
@@ -139,7 +139,7 @@ class TestShelfAccommodation:
     @pytest.mark.asyncio
     async def test_can_fit_media_on_shelf_with_varying_media_and_shelf_dimensions(
         self,
-        orientation: Shelf.ShelfOrientation,
+        orientation: Shelf.Orientation,
         dimension: str,
         media_dimension: Decimal,
         shelf_dimension: Decimal,
@@ -164,7 +164,7 @@ class TestShelfAccommodation:
     @pytest.mark.asyncio
     async def test_used_space_with_vertical_orientation_and_no_media(self, shelf_height: Decimal, expected_used_space: Decimal):
         """Test that Shelf.used_space behaves correctly with no physical media present."""
-        shelf: Shelf = await abake(Shelf, dimensions__height=shelf_height, orientation=Shelf.ShelfOrientation.VERTICAL)
+        shelf: Shelf = await abake(Shelf, dimensions__height=shelf_height, orientation=Shelf.Orientation.VERTICAL)
 
         assert await shelf.used_space() == expected_used_space
 
@@ -181,7 +181,7 @@ class TestShelfAccommodation:
     @pytest.mark.asyncio
     async def test_used_space_with_horizontal_orientation_and_no_media(self, shelf_width: Decimal, expected_used_space: Decimal):
         """Test that Shelf.used_space behaves correctly with no physical media present."""
-        shelf: Shelf = await abake(Shelf, dimensions__width=shelf_width, orientation=Shelf.ShelfOrientation.HORIZONTAL)
+        shelf: Shelf = await abake(Shelf, dimensions__width=shelf_width, orientation=Shelf.Orientation.HORIZONTAL)
 
         assert await shelf.used_space() == expected_used_space
 
@@ -204,7 +204,7 @@ class TestShelfAccommodation:
     ):
         """Test that Shelf.used_space is always the sum of physical media widths varying numbers of physical media present."""
         media: list[PhysicalMedia] = [await abake(PhysicalMedia, case_dimensions__height=media_width) for media_width in media_heights]
-        shelf: Shelf = await abake(Shelf, dimensions__height=shelf_height, orientation=Shelf.ShelfOrientation.VERTICAL)
+        shelf: Shelf = await abake(Shelf, dimensions__height=shelf_height, orientation=Shelf.Orientation.VERTICAL)
         await shelf.physical_media_set.aadd(*media)
 
         assert await shelf.used_space() == expected_used_space
@@ -228,7 +228,7 @@ class TestShelfAccommodation:
     ):
         """Test that Shelf.used_space is always the sum of physical media widths varying numbers of physical media present."""
         media: list[PhysicalMedia] = [await abake(PhysicalMedia, case_dimensions__width=media_width) for media_width in media_widths]
-        shelf: Shelf = await abake(Shelf, dimensions__width=shelf_width, orientation=Shelf.ShelfOrientation.HORIZONTAL)
+        shelf: Shelf = await abake(Shelf, dimensions__width=shelf_width, orientation=Shelf.Orientation.HORIZONTAL)
         await shelf.physical_media_set.aadd(*media)
 
         assert await shelf.used_space() == expected_used_space

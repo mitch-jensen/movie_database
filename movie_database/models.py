@@ -66,8 +66,8 @@ class MediaCaseDimension(Dimension):
 class Shelf(models.Model):
     """Represents a shelf in a bookcase."""
 
-    class ShelfOrientation(models.TextChoices):
-        """Choices for Physical Media orientation."""
+    class Orientation(models.TextChoices):
+        """How media are to be stacked on the shelf: vertically standing (VERTICAL), or stacked flat (HORIZONTAL)."""
 
         VERTICAL = "V", "Vertical"
         HORIZONTAL = "H", "Horizontal"
@@ -88,8 +88,8 @@ class Shelf(models.Model):
     )
     orientation = models.CharField(
         max_length=1,
-        choices=ShelfOrientation.choices,
-        default=ShelfOrientation.VERTICAL,
+        choices=Orientation.choices,
+        default=Orientation.VERTICAL,
     )
     physical_media_set: "RelatedManager['PhysicalMedia']"
 
@@ -110,7 +110,7 @@ class Shelf(models.Model):
 
     def can_fit_media(self, media: "PhysicalMedia") -> bool:
         """Check if a single PhysicalMedia can physically fit on this shelf."""
-        if self.orientation == self.ShelfOrientation.VERTICAL.value:
+        if self.orientation == self.Orientation.VERTICAL.value:
             return media.case_dimensions.height <= self.dimensions.height
         return media.case_dimensions.width <= self.dimensions.width
 
@@ -120,13 +120,13 @@ class Shelf(models.Model):
         if not await self.physical_media_set.aexists():
             return Decimal(0)
 
-        aggregation_field = f"case_dimensions__{'height' if self.orientation == self.ShelfOrientation.VERTICAL.value else 'width'}"
+        aggregation_field = f"case_dimensions__{'height' if self.orientation == self.Orientation.VERTICAL.value else 'width'}"
         used: dict[str, Decimal] = await self.physical_media_set.select_related("case_dimensions").aaggregate(used_space=models.Sum(aggregation_field))
         return used["used_space"]
 
     async def available_space(self) -> Decimal:
         """Return remaining usable width (VERTICAL) or height (HORIZONTAL) in mm."""
-        total_space = self.dimensions.height if self.orientation == self.ShelfOrientation.VERTICAL.value else self.dimensions.width
+        total_space = self.dimensions.height if self.orientation == self.Orientation.VERTICAL.value else self.dimensions.width
         return total_space - await self.used_space()
 
     async def can_accommodate(self, media: "PhysicalMedia") -> bool:
@@ -137,7 +137,7 @@ class Shelf(models.Model):
 
         available_space: Decimal = await self.available_space()
 
-        if self.orientation == self.ShelfOrientation.VERTICAL.value:
+        if self.orientation == self.Orientation.VERTICAL.value:
             return media.case_dimensions.width <= available_space
         return media.case_dimensions.height <= available_space
 

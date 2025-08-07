@@ -64,7 +64,7 @@ class ShelfCreator(Protocol):  # noqa: D101
         position_from_top: int,
         bookcase: Bookcase,
         dimensions: ShelfDimension = ...,
-        orientation: Shelf.ShelfOrientation = ...,
+        orientation: Shelf.Orientation = ...,
     ) -> Awaitable[Shelf]: ...
 
 
@@ -200,10 +200,10 @@ async def make_shelf(make_shelf_dimension: ShelfDimensionCreator) -> ShelfCreato
         position_from_top: int,
         bookcase: Bookcase,
         dimensions: ShelfDimension | None = None,
-        orientation: Shelf.ShelfOrientation | None = None,
+        orientation: Shelf.Orientation | None = None,
     ) -> Shelf:
         _dimensions: ShelfDimension = dimensions or await make_shelf_dimension()
-        _orientation: Shelf.ShelfOrientation = orientation or Shelf.ShelfOrientation.HORIZONTAL
+        _orientation: Shelf.Orientation = orientation or Shelf.Orientation.HORIZONTAL
         return await Shelf.objects.acreate(position_from_top=position_from_top, bookcase=bookcase, dimensions=_dimensions, orientation=_orientation)
 
     return _make_shelf
