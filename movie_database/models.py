@@ -18,6 +18,26 @@ class Dimension(models.Model):
     class Meta:  # noqa: D106
         abstract = True
 
+    def get_axis_size(self, axis: Literal["height", "width"]) -> Decimal:
+        """Return the size of the specified axis (height or width).
+
+        Args:
+            axis: The axis to retrieve ("height" or "width").
+
+        Raises:
+            ValueError: If an invalid axis is provided.
+
+        Returns:
+            Decimal: The size in mm of the given axis.
+
+        """
+        if axis == "height":
+            return self.height
+        if axis == "width":
+            return self.width
+        msg = f"Invalid axis: {axis}"
+        raise ValueError(msg)
+
 
 class ShelfDimension(Dimension):
     """Represents the dimensions of a shelf."""
@@ -115,8 +135,8 @@ class Shelf(models.Model):
 
     def can_fit_media(self, media: "PhysicalMedia") -> bool:
         """Check if a single media can fit on this shelf, without accounting for actual remaining space."""
-        media_axis_size: Decimal = getattr(media.dimensions, self.stacking_axis)
-        shelf_axis_size: Decimal = getattr(self.dimensions, self.stacking_axis)
+        media_axis_size: Decimal = media.dimensions.get_axis_size(self.stacking_axis)
+        shelf_axis_size: Decimal = self.dimensions.get_axis_size(self.stacking_axis)
         shelf_depth = self.dimensions.depth
         media_depth = media.dimensions.depth
         return media_axis_size <= shelf_axis_size and media_depth <= shelf_depth
@@ -132,8 +152,8 @@ class Shelf(models.Model):
         return used["used_space"]
 
     async def available_space(self) -> Decimal:
-        """Return remaining usable width (VERTICAL) or height (HORIZONTAL) in mm."""
-        total_space: Decimal = getattr(self.dimensions, self.stacking_axis)
+        """Return remaining space along stacking axis (height or width, depending on shelf orientation)."""
+        total_space: Decimal = self.dimensions.get_axis_size(self.stacking_axis)
         return total_space - await self.used_space()
 
     async def can_accommodate(self, media: "PhysicalMedia") -> bool:
@@ -143,7 +163,7 @@ class Shelf(models.Model):
             return False
 
         available_space: Decimal = await self.available_space()
-        media_axis_size: Decimal = getattr(media.dimensions, self.stacking_axis)
+        media_axis_size: Decimal = media.dimensions.get_axis_size(self.stacking_axis)
 
         return media_axis_size <= available_space
 
