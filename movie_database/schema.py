@@ -2,50 +2,50 @@ from typing import Annotated
 
 from ninja import Field, FilterSchema, ModelSchema
 
-from .models import Bookcase, Collection, MediaCaseDimensions, Movie, PhysicalMedia, Shelf
+import movie_database.models as movie_models
 
 IContainsField = Annotated[str | None, Field(None, q="__icontains")]  # pyright: ignore[reportCallIssue]
 
 
 class BookcaseSchemaOut(ModelSchema):  # noqa: D101
     class Meta:  # noqa: D106
-        model = Bookcase
+        model = movie_models.Bookcase
         fields = ("id", "name", "description", "location")
 
 
 class BookcaseSchemaIn(ModelSchema):  # noqa: D101
     class Meta:  # noqa: D106
-        model = Bookcase
+        model = movie_models.Bookcase
         fields = ("name", "description", "location")
 
 
 class CollectionSchemaOut(ModelSchema):  # noqa: D101
     class Meta:  # noqa: D106
-        model = Collection
+        model = movie_models.Collection
         fields = ("id", "name")
 
 
 class CollectionSchemaIn(ModelSchema):  # noqa: D101
     class Meta:  # noqa: D106
-        model = Collection
+        model = movie_models.Collection
         fields = ("name",)
 
 
 class ShelfSchemaOut(ModelSchema):  # noqa: D101
     class Meta:  # noqa: D106
-        model = Shelf
+        model = movie_models.Shelf
         fields = ("id", "position_from_top", "orientation")
 
 
 class MediaCaseDimensionSchemaOut(ModelSchema):  # noqa: D101
     class Meta:  # noqa: D106
-        model = MediaCaseDimensions
+        model = movie_models.MediaCaseDimensions
         fields = ("id", "width", "height", "depth", "media_format", "description")
 
 
 class MediaCaseDimensionSchemaIn(ModelSchema):  # noqa: D101
     class Meta:  # noqa: D106
-        model = MediaCaseDimensions
+        model = movie_models.MediaCaseDimensions
         fields = ("width", "height", "depth", "media_format", "description")
 
 
@@ -56,31 +56,31 @@ class MediaCaseDimensionFilterSchema(FilterSchema):  # noqa: D101
 
 class ShelfDimensionSchemaOut(ModelSchema):  # noqa: D101
     class Meta:  # noqa: D106
-        model = MediaCaseDimensions
+        model = movie_models.MediaCaseDimensions
         fields = ("id", "width", "height", "depth")
 
 
 class ShelfDimensionSchemaIn(ModelSchema):  # noqa: D101
     class Meta:  # noqa: D106
-        model = MediaCaseDimensions
+        model = movie_models.MediaCaseDimensions
         fields = ("width", "height", "depth")
 
 
 class MovieSchemaOut(ModelSchema):  # noqa: D101
     class Meta:  # noqa: D106
-        model = Movie
+        model = movie_models.Movie
         fields = ("id", "title", "release_year", "letterboxd_uri", "watched")
 
 
 class MovieSchemaIn(ModelSchema):  # noqa: D101
     class Meta:  # noqa: D106
-        model = Movie
+        model = movie_models.Movie
         fields = ("title", "release_year", "letterboxd_uri", "watched")
 
 
 class PhysicalMediaSchema(ModelSchema):  # noqa: D101
     class Meta:  # noqa: D106
-        model = PhysicalMedia
+        model = movie_models.PhysicalMedia
         fields = ("position_on_shelf", "notes")
 
 
