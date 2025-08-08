@@ -18,7 +18,7 @@ class TestListMovies:
     @pytest.mark.django_db(transaction=True)
     async def test_no_movies(self, async_client: AsyncClient):
         """Test listing movies when there are no movies in the database."""
-        response: HttpResponse = await async_client.get("/api/v1/movie_database/movies")
+        response: HttpResponse = await async_client.get("/api/v1/movie_database/movies/?limit=100&offset=0")
 
         assert response.status_code == 200
         assert response.json() == {"items": [], "count": 0}
@@ -33,7 +33,7 @@ class TestListMovies:
         movie4: Movie = await make_movie("Movie 4", "2024")
         movie5: Movie = await make_movie("Movie 5", "2025")
 
-        response: HttpResponse = await async_client.get("/api/v1/movie_database/movies")
+        response: HttpResponse = await async_client.get("/api/v1/movie_database/movies/?limit=100&offset=0")
 
         assert response.status_code == 200
 
