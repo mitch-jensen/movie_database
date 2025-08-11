@@ -146,8 +146,8 @@ class TestShelfAccommodation:
         should_fit: bool,
     ):
         """Test that Shelf.can_fit_media behaves correctly for vertical orientations."""
-        media: PhysicalMedia = await abake(PhysicalMedia, **{f"dimensions__{dimension}": media_dimension})
-        shelf: Shelf = await abake(Shelf, **{f"dimensions__{dimension}": shelf_dimension, "orientation": orientation})
+        media: PhysicalMedia = await abake(PhysicalMedia, **{f"dimensions__{dimension}": media_dimension, "dimensions__depth": 1})
+        shelf: Shelf = await abake(Shelf, **{f"dimensions__{dimension}": shelf_dimension, "dimensions__depth": 2, "orientation": orientation})
 
         assert shelf.can_fit_media(media) == should_fit
 
