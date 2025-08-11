@@ -6,7 +6,7 @@ from asgiref.sync import sync_to_async
 from django.db import IntegrityError, models
 from model_bakery import baker
 
-from movie_database.models import Bookcase, Collection, MediaCaseDimensions, MediaFormat, Movie, PhysicalMedia, PhysicalMediaOrientation, Shelf, TMDbProfile
+from movie_database.models import Bookcase, Collection, MediaCaseDimension, Movie, PhysicalMedia, Shelf, TMDbProfile
 
 
 async def abake[T: models.Model](model: type[T], *args: Any, **kwargs: Any) -> T:  # noqa: ANN401
@@ -115,8 +115,8 @@ class TestShelfAccommodation:
     @pytest.mark.parametrize(
         ("orientation", "dimension"),
         [
-            (PhysicalMediaOrientation.VERTICAL, "height"),
-            (PhysicalMediaOrientation.HORIZONTAL, "width"),
+            (Shelf.Orientation.VERTICAL, "height"),
+            (Shelf.Orientation.HORIZONTAL, "width"),
         ],
     )
     @pytest.mark.parametrize(
@@ -139,15 +139,15 @@ class TestShelfAccommodation:
     @pytest.mark.asyncio
     async def test_can_fit_media_on_shelf_with_varying_media_and_shelf_dimensions(
         self,
-        orientation: PhysicalMediaOrientation,
+        orientation: Shelf.Orientation,
         dimension: str,
         media_dimension: Decimal,
         shelf_dimension: Decimal,
         should_fit: bool,
     ):
         """Test that Shelf.can_fit_media behaves correctly for vertical orientations."""
-        media: PhysicalMedia = await abake(PhysicalMedia, **{f"case_dimensions__{dimension}": media_dimension})
-        shelf: Shelf = await abake(Shelf, **{f"dimensions__{dimension}": shelf_dimension, "orientation": orientation})
+        media: PhysicalMedia = await abake(PhysicalMedia, **{f"dimensions__{dimension}": media_dimension, "dimensions__depth": 1})
+        shelf: Shelf = await abake(Shelf, **{f"dimensions__{dimension}": shelf_dimension, "dimensions__depth": 2, "orientation": orientation})
 
         assert shelf.can_fit_media(media) == should_fit
 
@@ -164,7 +164,7 @@ class TestShelfAccommodation:
     @pytest.mark.asyncio
     async def test_used_space_with_vertical_orientation_and_no_media(self, shelf_height: Decimal, expected_used_space: Decimal):
         """Test that Shelf.used_space behaves correctly with no physical media present."""
-        shelf: Shelf = await abake(Shelf, dimensions__height=shelf_height, orientation=PhysicalMediaOrientation.VERTICAL)
+        shelf: Shelf = await abake(Shelf, dimensions__height=shelf_height, orientation=Shelf.Orientation.VERTICAL)
 
         assert await shelf.used_space() == expected_used_space
 
@@ -181,7 +181,7 @@ class TestShelfAccommodation:
     @pytest.mark.asyncio
     async def test_used_space_with_horizontal_orientation_and_no_media(self, shelf_width: Decimal, expected_used_space: Decimal):
         """Test that Shelf.used_space behaves correctly with no physical media present."""
-        shelf: Shelf = await abake(Shelf, dimensions__width=shelf_width, orientation=PhysicalMediaOrientation.HORIZONTAL)
+        shelf: Shelf = await abake(Shelf, dimensions__width=shelf_width, orientation=Shelf.Orientation.HORIZONTAL)
 
         assert await shelf.used_space() == expected_used_space
 
@@ -203,8 +203,8 @@ class TestShelfAccommodation:
         expected_used_space: Decimal,
     ):
         """Test that Shelf.used_space is always the sum of physical media widths varying numbers of physical media present."""
-        media: list[PhysicalMedia] = [await abake(PhysicalMedia, case_dimensions__height=media_width) for media_width in media_heights]
-        shelf: Shelf = await abake(Shelf, dimensions__height=shelf_height, orientation=PhysicalMediaOrientation.VERTICAL)
+        media: list[PhysicalMedia] = [await abake(PhysicalMedia, dimensions__height=media_width) for media_width in media_heights]
+        shelf: Shelf = await abake(Shelf, dimensions__height=shelf_height, orientation=Shelf.Orientation.VERTICAL)
         await shelf.physical_media_set.aadd(*media)
 
         assert await shelf.used_space() == expected_used_space
@@ -227,23 +227,23 @@ class TestShelfAccommodation:
         expected_used_space: Decimal,
     ):
         """Test that Shelf.used_space is always the sum of physical media widths varying numbers of physical media present."""
-        media: list[PhysicalMedia] = [await abake(PhysicalMedia, case_dimensions__width=media_width) for media_width in media_widths]
-        shelf: Shelf = await abake(Shelf, dimensions__width=shelf_width, orientation=PhysicalMediaOrientation.HORIZONTAL)
+        media: list[PhysicalMedia] = [await abake(PhysicalMedia, dimensions__width=media_width) for media_width in media_widths]
+        shelf: Shelf = await abake(Shelf, dimensions__width=shelf_width, orientation=Shelf.Orientation.HORIZONTAL)
         await shelf.physical_media_set.aadd(*media)
 
         assert await shelf.used_space() == expected_used_space
 
 
 class TestMediaCaseDimension:
-    """Test class for the MediaCaseDimensions model."""
+    """Test class for the MediaCaseDimension model."""
 
     @pytest.mark.django_db
     @pytest.mark.asyncio
     async def test_str_method(self):
-        """Test the string representation of the MediaCaseDimensions model."""
+        """Test the string representation of the MediaCaseDimension model."""
         dimensions = await abake(
-            MediaCaseDimensions,
-            media_format=MediaFormat.DVD,
+            MediaCaseDimension,
+            media_format=MediaCaseDimension.Format.DVD,
             description="DVD (Standard)",
             width=Decimal("100.01"),
             height=Decimal("101.00"),
@@ -255,8 +255,8 @@ class TestMediaCaseDimension:
     @pytest.mark.asyncio
     async def test_bluray_us_standard_exists(self):
         """Test if the Blu-ray US Standard dimensions exist."""
-        assert await MediaCaseDimensions.objects.filter(
-            media_format=MediaFormat.BLURAY,
+        assert await MediaCaseDimension.objects.filter(
+            media_format=MediaCaseDimension.Format.BLURAY,
             description="Blu-ray (US Standard)",
             width=128.50,
             height=148.00,
@@ -267,8 +267,8 @@ class TestMediaCaseDimension:
     @pytest.mark.asyncio
     async def test_bluray_uk_standard_exists(self):
         """Test if the Blu-ray UK Standard dimensions exist."""
-        assert await MediaCaseDimensions.objects.filter(
-            media_format=MediaFormat.BLURAY,
+        assert await MediaCaseDimension.objects.filter(
+            media_format=MediaCaseDimension.Format.BLURAY,
             description="Blu-ray (UK Standard)",
             width=148.00,
             height=129.00,
@@ -279,8 +279,8 @@ class TestMediaCaseDimension:
     @pytest.mark.asyncio
     async def test_dvd_standard_exists(self):
         """Test if the DVD Standard dimensions exist."""
-        assert await MediaCaseDimensions.objects.filter(
-            media_format=MediaFormat.DVD,
+        assert await MediaCaseDimension.objects.filter(
+            media_format=MediaCaseDimension.Format.DVD,
             description="DVD (Standard)",
             width=130.00,
             height=184.00,
