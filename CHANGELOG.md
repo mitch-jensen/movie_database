@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/mitch-jensen/movie_database/compare/v0.4.0...v0.5.0) (2025-08-11)
+
+
+### Features
+
+* improve main api endpoints ([#53](https://github.com/mitch-jensen/movie_database/issues/53)) ([b29e21b](https://github.com/mitch-jensen/movie_database/commit/b29e21bdf7421e888de31fb454b3722582da840d))
+
 ## [0.4.0](https://github.com/mitch-jensen/movie_database/compare/v0.3.0...v0.4.0) (2025-08-06)
 
 
