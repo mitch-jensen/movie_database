@@ -56,13 +56,13 @@ repos:
       - id: taplo-format
       - id: taplo-lint
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.8
+    rev: v0.12.11
     hooks:
       - id: ruff
         args: [--fix]
       - id: ruff-format
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.8.8
+    rev: 0.8.14
     hooks:
       - id: uv-lock
       - id: uv-sync
