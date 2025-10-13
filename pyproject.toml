@@ -1,14 +1,14 @@
 [project]
 authors = [{ name = "Mitchell Jensen" }]
 dependencies = [
-  "django>=5.2,<7.0",
   "django-ninja (>=1.4.3,<2)",
   "django-structlog (>=9.1.1,<10)",
   "django-stubs-ext (>=5.2.2,<6)",
   "django-types (>=0.22.0,<1)",
+  "django>=5.2,<7.0",
   "gunicorn (>=23.0.0,<24)",
-  "psycopg[binary,pool] (>=3.2.9,<4)",
-  "pydantic (>=2.11.7,<3)",
+  "psycopg[binary,pool]>=3.3.3,<4",
+  "pydantic (>=2.12.5,<3)",
   "rich (>=14.1.0,<15)",
   "structlog (>=25.4.0,<26)",
   "uvicorn>=0.34.0,<0.42.0",
@@ -16,7 +16,7 @@ dependencies = [
 description = ""
 name = "movie-database"
 readme = "README.md"
-requires-python = ">=3.13,<3.14"
+requires-python = ">=3.14,<3.15"
 version = "0.5.0"
 
 [dependency-groups]
@@ -68,7 +68,7 @@ exclude = [
 indent-width = 4
 line-length  = 160
 
-target-version = "py313"
+target-version = "py314"
 
 [tool.ruff.lint]
 ignore = ["D100", "D104"]
