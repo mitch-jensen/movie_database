@@ -1,7 +1,7 @@
 [project]
 authors = [{ name = "Mitchell Jensen" }]
 dependencies = [
-  "django (>=5.2,<6.0)",
+  "django>=5.2,<7.0",
   "django-ninja (>=1.4.3,<2)",
   "django-structlog (>=9.1.1,<10)",
   "django-stubs-ext (>=5.2.2,<6)",
