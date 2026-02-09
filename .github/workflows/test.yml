@@ -20,7 +20,7 @@ jobs:
         run: uv run --frozen pytest --junitxml=junit/test-results.xml --cov=movie_database --cov-report=xml --cov-report=html
 
       - name: Test Report
-        uses: dorny/test-reporter@v2.1.1
+        uses: dorny/test-reporter@v2.5.0
         if: ${{ !cancelled() }}
         with:
           name: Python Test
