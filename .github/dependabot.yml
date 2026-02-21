@@ -1,5 +1,6 @@
 ---
 version: 2
+enable-beta-ecosystems: true
 updates:
   - package-ecosystem: uv
     directory: /
@@ -20,3 +21,6 @@ updates:
     directory: /docker
     schedule:
       interval: weekly
+
+  - package-ecosystem: pre-commit
+    directory: /
