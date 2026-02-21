@@ -15,11 +15,7 @@ DATABASES = {
         "HOST": "db",
         "PORT": "5432",
         "OPTIONS": {
-            "pool": {
-                "min_size": 2,
-                "max_size": 4,
-                "timeout": 100,
-            },
+            "pool": True,
         },
     },
 }

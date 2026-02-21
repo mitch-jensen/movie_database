@@ -1,4 +1,4 @@
-FROM python:3.13-alpine AS base
+FROM python:3.14-alpine AS base
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
@@ -8,7 +8,7 @@ EXPOSE 8000
 RUN addgroup -g 1000 python \
     && adduser -u 1000 -G python -D python
 
-FROM python:3.13-alpine AS requirements-exporter
+FROM python:3.14-alpine AS requirements-exporter
 
 WORKDIR /app
 
