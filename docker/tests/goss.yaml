@@ -15,7 +15,7 @@ command:
   pip freeze:
     exit-status: 0
     stdout:
-      - Django==5.2.4
+      - Django==6.0.2
     stderr: []
     timeout: 10000
 user:
