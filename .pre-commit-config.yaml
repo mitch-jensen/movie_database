@@ -47,7 +47,7 @@ repos:
       - id: markdownlint
         exclude: CHANGELOG.md
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.13.7
+    rev: v5
     hooks:
       - id: commitizen
   - repo: https://github.com/ComPWA/taplo-pre-commit
