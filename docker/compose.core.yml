@@ -9,7 +9,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-error}
 
   caddy:
-    image: caddy:2.10.2-alpine
+    image: caddy:2.11.1-alpine
     ports:
       - "80:80"
     volumes:
